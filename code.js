@@ -1,8 +1,318 @@
 
-  
+
+
+
 var data = []
 const COLS = 10;
 const ROWS = 10;
+
+/*
+
+      Ivan's original algorithm
+
+*/
+function node() 
+    {
+        this.west = 0;
+        this.north = 0;
+        this.east = 0;
+        this.south = 0;
+        this.value = 0;
+        this.path = 0;
+        this.closest_origin = 0;
+    }
+
+var nodes_original = new Array();
+for (var k = 0; k < COLS*ROWS; k++)
+    {
+        nodes_original.push(new node());
+    }
+
+
+function calculate_nodes_original()
+    {
+        var i = x = y = count = path = j = 0;
+        var af = xf = yf = 0.0;
+
+        for (j=0; j<ROWS; j++)
+        {
+            for (i=0; i<COLS; i++)
+            {
+
+                //1st quarter
+                if ((j<=(COLS%2==0 ? Math.floor(COLS/2) : Math.floor(COLS/2))) && (i<=(ROWS%2==0 ? Math.floor(ROWS/2-1) : Math.floor(ROWS/2-1))))
+                {
+                    nodes_original[y*COLS+x].value = i*COLS + j;
+                    x = j;
+                    y = i;
+                    af = (y)/(x); // angle tangent 
+                    path = y + x;
+                    nodes_original[y*COLS+x].path = path;
+
+                    
+                        while (path>0)
+                        {
+                            yf = af*(x);
+                            xf = (y)/af;
+                            // console.log("x = ", x)
+                            // console.log("y = ", y)
+                            // console.log("af = ", af)
+                            // console.log("yf = ", yf)
+                            // console.log("xf = ", xf)
+                            if (((j>=i)&(y-yf<0.5))||((i>j)&(x-xf>0.5)))
+                            {
+                                // move left
+                                nodes_original[y*COLS+x].west++;
+                                nodes_original[y*COLS+x-1].east++;
+                                x--;
+                            }
+                            else
+                            {
+                                // move up
+                                nodes_original[y*COLS+x].north++;
+                                nodes_original[(y-1)*COLS+x].south++;
+                                y--;
+                            }
+                            path--;
+                        }
+                    
+                }
+                //2nd quarter
+                if ((j>=(COLS%2==0 ? Math.floor(COLS/2+1) : Math.floor(COLS/2+1))) && (i<=(ROWS%2==0 ? Math.floor(ROWS/2-1) : Math.floor(ROWS/2))))
+                {
+
+                    x = j;
+                    y = i;
+                    af = (y)/(COLS-x);
+                    path = y+COLS-x;
+                    nodes_original[y*COLS+x].path = path;
+
+
+                    
+                        while (path>0)
+                        {
+                            yf = af*(COLS-x);
+                            xf = COLS-(y)/af;
+                            if (((i>=COLS-j)&(y-yf<0.5))||((i<COLS-j)&(y-yf<-0.5)))
+                            {
+                                if (x==COLS-1)
+                                {
+                                    // move right
+                                    nodes_original[y*COLS+x].east++;
+                                    x=0;
+                                    nodes_original[y*COLS+x].west++;
+                                }
+                                else if (x==0)
+                                {
+                                    // move up
+                                    nodes_original[y*COLS+x].north++;
+                                    nodes_original[(y-1)*COLS+x].south++;
+                                    y--;
+                                }
+                                else
+                                {
+                                    // move right
+                                    nodes_original[y*COLS+x].east++;
+                                    nodes_original[y*COLS+x+1].west++;
+                                    x++;
+                                }
+                            }
+                            else
+                            {
+                                if(y==0)
+                                {
+                                    if (x==COLS-1)
+                                    {
+                                        // move right
+                                        nodes_original[y*COLS+x].east++;
+                                        x=0;
+                                        nodes_original[y*COLS+x].west++;
+                                    }
+                                    else
+                                    {
+                                        // move right
+                                        nodes_original[y*COLS+x].east++;
+                                        nodes_original[y*COLS+x+1].west++;
+                                        x++;
+                                    }
+                                }
+                                else
+                                {
+                                    // move up
+                                    nodes_original[y*COLS+x].north++;
+                                    nodes_original[(y-1)*COLS+x].south++;
+                                    y--;
+                                }
+                            }
+                            path--;
+                        }
+                    
+                }
+                //3rd quarter
+                if ((j>=(COLS%2==0 ? Math.floor(COLS/2) : Math.floor(COLS/2+1))) && (i>=(ROWS%2==0 ? Math.floor(ROWS/2) : Math.floor(ROWS/2+1))))
+                {
+                    x = j;
+                    y = i;
+                    af = (y)/(x);
+                    path = ROWS-y+COLS-x;
+                    nodes_original[y*COLS+x].path = path;
+
+
+                    
+                        while (path>0)
+                        {
+                            yf = af*(x);
+                            xf = (y)/af;
+                            if(((i>j)&(yf-y<0.5))||((i<=j)&(yf-y<-0.5)))
+                            {
+                            //if ((yf-y<0.5)) {
+                                if (x==COLS-1)
+                                {
+                                    // move right
+                                    nodes_original[y*COLS+x].east++;
+                                    x=0;
+                                    nodes_original[y*COLS+x].west++;
+                                }
+                                else if (x==0)
+                                {
+                                    if (y==ROWS-1)
+                                    {
+                                        // move down
+                                        nodes_original[y*COLS+x].south++;
+                                        y=0;
+                                        nodes_original[y*COLS+x].north++;
+                                    }
+                                    else
+                                    {
+                                        // move down
+                                        nodes_original[y*COLS+x].south++;
+                                        nodes_original[(y+1)*COLS+x].north++;
+                                        y++;
+                                    }
+                                }
+                                else
+                                {
+                                    // move rigth
+                                    nodes_original[y*COLS+x].east++;
+                                    nodes_original[y*COLS+x+1].west++;
+                                    x++;
+                                }
+                            }
+                            else if (y==ROWS-1)
+                            {
+                                // move down
+                                nodes_original[y*COLS+x].south++;
+                                y=0;
+                                nodes_original[y*COLS+x].north++;
+                            }
+                            else if (y==0)
+                            {
+                                if ((x==COLS-1))
+                                {
+                                    // move right
+                                    nodes_original[y*COLS+x].east++;
+                                    x=0;
+                                    nodes_original[y*COLS+x].west++;
+                                }
+                                else
+                                {
+
+                                    nodes_original[y*COLS+x].east++;
+                                    nodes_original[y*COLS+x+1].west++;
+                                    x++;
+                                }
+                            }
+
+                            else
+                            {
+
+                                nodes_original[y*COLS+x].south++;
+                                nodes_original[(y+1)*COLS+x].north++;
+                                y++;
+                            }
+                            path--;
+                        }
+                    
+                }
+                //4th quarter
+                if ((j<=(COLS%2==0 ? Math.floor(COLS/2-1) : Math.floor(COLS/2))) && (i>=(ROWS%2==0 ? Math.floor(ROWS/2) : Math.floor(ROWS/2))))
+                {
+                    x = j;
+                    y = i;
+                    af = (ROWS-y)/(x);
+                    path = ROWS-y+x;
+                    nodes_original[y*COLS+x].path = path;
+
+                    
+                        while (path>0)
+                        {
+                            yf = ROWS-af*(x);
+                            xf = (ROWS-y)/af;
+                            if (((ROWS-i<j)&(yf-y<0.5))||((ROWS-i>=j)&(yf-y<-0.5)))
+                            {
+                                if (x==0)
+                                {
+                                    if (y==ROWS-1)
+                                    {
+                                        //table[nodes[y*COLS+x].value][nodes[i*COLS+j].value] = 4;
+                                        nodes_original[y*COLS+x].south++;
+                                        y=0;
+                                        nodes_original[y*COLS+x].north++;
+                                    }
+                                    else
+                                    {
+                                        //table[nodes[y*COLS+x].value][nodes[i*COLS+j].value] = 4;
+                                        nodes_original[y*COLS+x].south++;
+                                        nodes_original[(y+1)*COLS+x].north++;
+                                        y++;
+                                    }
+                                }
+                                else
+                                {
+                                    //table[nodes[y*COLS+x].value][nodes[i*COLS+j].value] = 1;
+                                    nodes_original[y*COLS+x].west++;
+                                    nodes_original[y*COLS+x-1].east++;
+                                    x--;
+                                }
+                            }
+                            else
+                            {
+                                if (y==ROWS-1)
+                                {
+                                    //table[nodes[y*COLS+x].value][nodes[i*COLS+j].value] = 4;
+                                    nodes_original[y*COLS+x].south++;
+                                    y=0;
+                                    nodes_original[y*COLS+x].north++;
+                                }
+                                else if (y==0)
+                                {
+                                    //table[nodes[y*COLS+x].value][nodes[i*COLS+j].value] = 1;
+                                    nodes_original[y*COLS+x].west++;
+                                    nodes_original[y*COLS+x-1].east++;
+                                    x--;
+                                }
+                                else
+                                {
+                                    //table[nodes[y*COLS+x].value][nodes[i*COLS+j].value] = 4;
+                                    nodes_original[y*COLS+x].south++;
+                                    nodes_original[(y+1)*COLS+x].north++;
+                                    y++;
+                                }
+                            }
+                            path--;
+                        }
+                    
+                }
+
+            }
+        }
+        console.log("Ivan's original algorithm");
+        console.log(nodes_original);
+    }
+
+calculate_nodes_original()
+
+
 
 var i, j;
 for (i = 0; i < ROWS; i++) {
@@ -11,11 +321,11 @@ for (i = 0; i < ROWS; i++) {
       "data": {
         "id": "n-"+i+"-"+j,
         "weight": 53,
-        "label": "non"
+        // "label": "non"
       },
       "position": {
-        "x": 50+100*i,
-        "y": 50+100*j
+        "x": 50+110*i,
+        "y": 50+110*j
       },
       "group": "nodes",
       "removed": false,
@@ -23,7 +333,7 @@ for (i = 0; i < ROWS; i++) {
       "selectable": true,
       "locked": false,
       "grabbable": true,
-      "classes": "outline"
+      // "classes": "outline"
     });
   }
 }
@@ -37,7 +347,7 @@ for (i = 0; i < COLS; i++) {
           "weight": 31,
           "source": "n-"+i+"-"+j,
           "target": "n-"+i+"-"+(j+1),
-          "label": "non"
+          "label": nodes_original[j*COLS+i].south
         },
         "position": {},
         "group": "edges",
@@ -56,7 +366,8 @@ for (i = 0; i < COLS; i++) {
           "id": "e-"+i+j+"-"+i+0,
           "weight": 31,
           "source": "n-"+i+"-"+j,
-          "target": "n-"+i+"-"+0
+          "target": "n-"+i+"-"+0,
+          "label": nodes_original[j*COLS+i].south
         },
         "position": {},
         "group": "edges",
@@ -65,7 +376,7 @@ for (i = 0; i < COLS; i++) {
         "selectable": true,
         "locked": true,
         "grabbable": true,
-        "classes": ""
+        "classes": "outline unbundled-bezier"
       });
     }
 
@@ -76,7 +387,8 @@ for (i = 0; i < COLS; i++) {
           "id": "e-"+i+j+"-"+(i+1)+j,
           "weight": 31,
           "source": "n-"+i+"-"+j,
-          "target": "n-"+(i+1)+"-"+j
+          "target": "n-"+(i+1)+"-"+j,
+          "label": nodes_original[j*COLS+i].east
         },
         "position": {},
         "group": "edges",
@@ -85,7 +397,7 @@ for (i = 0; i < COLS; i++) {
         "selectable": true,
         "locked": true,
         "grabbable": true,
-        "classes": ""
+        "classes": "outline"
       });
     }
 
@@ -95,7 +407,8 @@ for (i = 0; i < COLS; i++) {
           "id": "e-"+i+j+"-"+0+j,
           "weight": 31,
           "source": "n-"+i+"-"+j,
-          "target": "n-"+0+"-"+j
+          "target": "n-"+0+"-"+j,
+          "label": nodes_original[j*COLS+i].east
         },
         "position": {},
         "group": "edges",
@@ -104,7 +417,7 @@ for (i = 0; i < COLS; i++) {
         "selectable": true,
         "locked": true,
         "grabbable": true,
-        "classes": "unbundled-bezier"
+        "classes": "outline unbundled-bezier"
       });
     }
   }
@@ -112,1205 +425,7 @@ for (i = 0; i < COLS; i++) {
 
 
 
-/*
-  var data =   [{
-  "data": {
-    "id": "n40"+0,
-    "weight": 53
-  },
-  "position": {
-    "x": 50,
-    "y": 45
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-},
 
- {
-  "data": {
-    "id": "n41",
-    "weight": 23
-  },
-  "position": {
-    "x": 150,
-    "y": 45
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n42",
-    "weight": 0
-  },
-  "position": {
-    "x": 250,
-    "y": 45
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n43",
-    "weight": 50
-  },
-  "position": {
-    "x": 350,
-    "y": 45
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n44",
-    "weight": 60
-  },
-  "position": {
-    "x": 450,
-    "y": 45
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n45",
-    "weight": 60
-  },
-  "position": {
-    "x": 550,
-    "y": 45
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n06",
-    "weight": 60
-  },
-  "position": {
-    "x": 550,
-    "y": 45
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n07",
-    "weight": 60
-  },
-  "position": {
-    "x": 550,
-    "y": 45
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n08",
-    "weight": 60
-  },
-  "position": {
-    "x": 550,
-    "y": 45
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n09",
-    "weight": 60
-  },
-  "position": {
-    "x": 550,
-    "y": 45
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-},
-
-
-
-
- {
-  "data": {
-    "id": "n46",
-    "weight": 39
-  },
-  "position": {
-    "x": 50,
-    "y": 135
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n47",
-    "weight": 96
-  },
-  "position": {
-    "x": 150,
-    "y": 135
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n48",
-    "weight": 68
-  },
-  "position": {
-    "x": 250,
-    "y": 135
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n49",
-    "weight": 83
-  },
-  "position": {
-    "x": 350,
-    "y": 135
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n50",
-    "weight": 77
-  },
-  "position": {
-    "x": 450,
-    "y": 135
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n51",
-    "weight": 40
-  },
-  "position": {
-    "x": 550,
-    "y": 135
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n52",
-    "weight": 84
-  },
-  "position": {
-    "x": 50,
-    "y": 225
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n53",
-    "weight": 47
-  },
-  "position": {
-    "x": 150,
-    "y": 225
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n54",
-    "weight": 27
-  },
-  "position": {
-    "x": 250,
-    "y": 225
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n55",
-    "weight": 14
-  },
-  "position": {
-    "x": 350,
-    "y": 225
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n56",
-    "weight": 3
-  },
-  "position": {
-    "x": 450,
-    "y": 225
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n57",
-    "weight": 13
-  },
-  "position": {
-    "x": 550,
-    "y": 225
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n58",
-    "weight": 60
-  },
-  "position": {
-    "x": 50,
-    "y": 315
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n59",
-    "weight": 72
-  },
-  "position": {
-    "x": 150,
-    "y": 315
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n60",
-    "weight": 55
-  },
-  "position": {
-    "x": 250,
-    "y": 315
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n61",
-    "weight": 3
-  },
-  "position": {
-    "x": 350,
-    "y": 315
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n62",
-    "weight": 65
-  },
-  "position": {
-    "x": 450,
-    "y": 315
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n63",
-    "weight": 57
-  },
-  "position": {
-    "x": 550,
-    "y": 315
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n64",
-    "weight": 24
-  },
-  "position": {
-    "x": 50,
-    "y": 405
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n65",
-    "weight": 68
-  },
-  "position": {
-    "x": 150,
-    "y": 405
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n66",
-    "weight": 33
-  },
-  "position": {
-    "x": 250,
-    "y": 405
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n67",
-    "weight": 26
-  },
-  "position": {
-    "x": 350,
-    "y": 405
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n68",
-    "weight": 54
-  },
-  "position": {
-    "x": 450,
-    "y": 405
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "n69",
-    "weight": 42
-  },
-  "position": {
-    "x": 550,
-    "y": 405
-  },
-  "group": "nodes",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e121",
-    "weight": 19,
-    "source": "n41",
-    "target": "n50"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e129",
-    "weight": 31,
-    "source": "n65",
-    "target": "n58"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e131",
-    "weight": 90,
-    "source": "n53",
-    "target": "n43"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e132",
-    "weight": 36,
-    "source": "n52",
-    "target": "n58"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e138",
-    "weight": 65,
-    "source": "n54",
-    "target": "n55"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e142",
-    "weight": 93,
-    "source": "n40",
-    "target": "n45"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e143",
-    "weight": 58,
-    "source": "n63",
-    "target": "n68"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e144",
-    "weight": 6,
-    "source": "n66",
-    "target": "n56"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e149",
-    "weight": 59,
-    "source": "n67",
-    "target": "n45"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e155",
-    "weight": 66,
-    "source": "n43",
-    "target": "n56"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e162",
-    "weight": 39,
-    "source": "n60",
-    "target": "n63"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e164",
-    "weight": 72,
-    "source": "n42",
-    "target": "n68"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e167",
-    "weight": 45,
-    "source": "n43",
-    "target": "n48"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e168",
-    "weight": 10,
-    "source": "n61",
-    "target": "n67"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e173",
-    "weight": 6,
-    "source": "n56",
-    "target": "n40"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e176",
-    "weight": 36,
-    "source": "n48",
-    "target": "n67"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e184",
-    "weight": 59,
-    "source": "n67",
-    "target": "n43"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e210",
-    "weight": 82,
-    "source": "n59",
-    "target": "n66"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e215",
-    "weight": 47,
-    "source": "n51",
-    "target": "n51"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e216",
-    "weight": 70,
-    "source": "n46",
-    "target": "n67"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e218",
-    "weight": 33,
-    "source": "n46",
-    "target": "n62"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e222",
-    "weight": 19,
-    "source": "n49",
-    "target": "n62"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e224",
-    "weight": 92,
-    "source": "n47",
-    "target": "n56"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e234",
-    "weight": 97,
-    "source": "n42",
-    "target": "n63"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e238",
-    "weight": 73,
-    "source": "n58",
-    "target": "n65"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e239",
-    "weight": 99,
-    "source": "n47",
-    "target": "n59"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e260",
-    "weight": 54,
-    "source": "n51",
-    "target": "n45"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e261",
-    "weight": 15,
-    "source": "n63",
-    "target": "n45"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e263",
-    "weight": 43,
-    "source": "n47",
-    "target": "n42"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e268",
-    "weight": 69,
-    "source": "n44",
-    "target": "n49"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e272",
-    "weight": 77,
-    "source": "n50",
-    "target": "n61"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e273",
-    "weight": 95,
-    "source": "n44",
-    "target": "n57"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e274",
-    "weight": 70,
-    "source": "n48",
-    "target": "n58"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e278",
-    "weight": 75,
-    "source": "n57",
-    "target": "n41"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e293",
-    "weight": 50,
-    "source": "n44",
-    "target": "n63"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e295",
-    "weight": 98,
-    "source": "n50",
-    "target": "n66"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e298",
-    "weight": 76,
-    "source": "n49",
-    "target": "n60"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e299",
-    "weight": 6,
-    "source": "n42",
-    "target": "n65"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e307",
-    "weight": 69,
-    "source": "n52",
-    "target": "n47"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e308",
-    "weight": 62,
-    "source": "n53",
-    "target": "n62"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e309",
-    "weight": 66,
-    "source": "n66",
-    "target": "n53"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e311",
-    "weight": 94,
-    "source": "n65",
-    "target": "n55"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}, {
-  "data": {
-    "id": "e312",
-    "weight": 31,
-    "source": "n58",
-    "target": "n42"
-  },
-  "position": {},
-  "group": "edges",
-  "removed": false,
-  "selected": false,
-  "selectable": true,
-  "locked": true,
-  "grabbable": true,
-  "classes": ""
-}];
-*/
     var cy = window.cy = cytoscape({
       container: document.getElementById('cy'),
 
@@ -1363,7 +478,19 @@ for (i = 0; i < COLS; i++) {
             'text-outline-color': "#888",
             'text-outline-width': 3
             }
-            }
+            },
+
+            {
+  selector: "edge.unbundled-bezier",
+  style: {
+    "curve-style": "unbundled-bezier",
+    "control-point-distances": 120,
+    "control-point-weights": 0.1
+  }
+}
+
+
+
       ],
 
       elements: data
