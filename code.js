@@ -4,13 +4,14 @@
 
 var data = []
 const COLS = 10;
-const ROWS = 10;
+const ROWS = 5;
 
 /*
 
       Ivan's original algorithm
 
 */
+
 function node() 
     {
         this.west = 0;
@@ -311,12 +312,13 @@ function calculate_nodes_original()
     }
 
 calculate_nodes_original()
+display_grid()
 
-
+function display_grid(){
 
 var i, j;
-for (i = 0; i < ROWS; i++) {
-  for (j = 0; j < COLS; j++) {
+for (i = 0; i < COLS; i++) {
+  for (j = 0; j < ROWS; j++) {
     data.push( {
       "data": {
         "id": "n-"+i+"-"+j,
@@ -338,12 +340,14 @@ for (i = 0; i < ROWS; i++) {
   }
 }
 
+// two for loops for creating edges
+
 for (i = 0; i < COLS; i++) {
   for (j = 0; j < ROWS; j++) {
       if(j != ROWS-1) { // if the element is not at the last row
       data.push({
         "data": {
-          "id": "e-"+i+j+"-"+i+(j+1),
+          "id": "e-"+i+"-"+j+"---"+i+"-"+(j+1),
           "weight": 31,
           "source": "n-"+i+"-"+j,
           "target": "n-"+i+"-"+(j+1),
@@ -423,7 +427,7 @@ for (i = 0; i < COLS; i++) {
   }
 }
 
-
+  console.log(data);
 
 
     var cy = window.cy = cytoscape({
@@ -481,12 +485,12 @@ for (i = 0; i < COLS; i++) {
             },
 
             {
-  selector: "edge.unbundled-bezier",
-  style: {
-    "curve-style": "unbundled-bezier",
-    "control-point-distances": 120,
-    "control-point-weights": 0.1
-  }
+            selector: "edge.unbundled-bezier",
+            style: {
+              "curve-style": "unbundled-bezier",
+              "control-point-distances": 120,
+              "control-point-weights": 0.1
+            }
 }
 
 
@@ -496,3 +500,6 @@ for (i = 0; i < COLS; i++) {
       elements: data
     });
 
+
+
+}
