@@ -5,12 +5,13 @@ const COLS = 10;
 const ROWS = 10;
 
 var i, j;
-for (i = 0; i < COLS; i++) {
-  for (j = 0; j < ROWS; j++) {
+for (i = 0; i < ROWS; i++) {
+  for (j = 0; j < COLS; j++) {
     data.push( {
       "data": {
-        "id": "n"+i+j,
-        "weight": 53
+        "id": "n-"+i+"-"+j,
+        "weight": 53,
+        "label": "non"
       },
       "position": {
         "x": 50+100*i,
@@ -20,12 +21,97 @@ for (i = 0; i < COLS; i++) {
       "removed": false,
       "selected": false,
       "selectable": true,
-      "locked": true,
+      "locked": false,
       "grabbable": true,
-      "classes": ""
+      "classes": "outline"
     });
   }
 }
+
+for (i = 0; i < COLS; i++) {
+  for (j = 0; j < ROWS; j++) {
+      if(j != ROWS-1) { // if the element is not at the last row
+      data.push({
+        "data": {
+          "id": "e-"+i+j+"-"+i+(j+1),
+          "weight": 31,
+          "source": "n-"+i+"-"+j,
+          "target": "n-"+i+"-"+(j+1),
+          "label": "non"
+        },
+        "position": {},
+        "group": "edges",
+        "removed": false,
+        "selected": false,
+        "selectable": true,
+        "locked": true,
+        "grabbable": true,
+        "classes": "outline"
+      });
+    }
+    else // if the element is  at the last row -- wrap around to the 0th row
+    {
+      data.push({
+        "data": {
+          "id": "e-"+i+j+"-"+i+0,
+          "weight": 31,
+          "source": "n-"+i+"-"+j,
+          "target": "n-"+i+"-"+0
+        },
+        "position": {},
+        "group": "edges",
+        "removed": false,
+        "selected": false,
+        "selectable": true,
+        "locked": true,
+        "grabbable": true,
+        "classes": ""
+      });
+    }
+
+
+      if(i != COLS-1) { // if the element is not at the last row
+      data.push({ 
+        "data": {
+          "id": "e-"+i+j+"-"+(i+1)+j,
+          "weight": 31,
+          "source": "n-"+i+"-"+j,
+          "target": "n-"+(i+1)+"-"+j
+        },
+        "position": {},
+        "group": "edges",
+        "removed": false,
+        "selected": false,
+        "selectable": true,
+        "locked": true,
+        "grabbable": true,
+        "classes": ""
+      });
+    }
+
+    else { // if the element is at the last row -- wrap around
+      data.push({ 
+        "data": {
+          "id": "e-"+i+j+"-"+0+j,
+          "weight": 31,
+          "source": "n-"+i+"-"+j,
+          "target": "n-"+0+"-"+j
+        },
+        "position": {},
+        "group": "edges",
+        "removed": false,
+        "selected": false,
+        "selectable": true,
+        "locked": true,
+        "grabbable": true,
+        "classes": "unbundled-bezier"
+      });
+    }
+  }
+}
+
+
+
 /*
   var data =   [{
   "data": {
@@ -1232,29 +1318,52 @@ for (i = 0; i < COLS; i++) {
       autounselectify: true,
 
       layout: {
-        name: 'grid'
+        name: 'preset'
       },
 
       style: [
-        {
-          selector: 'node',
-          style: {
-            'height': 20,
-            'width': 20,
-            'background-color': '#18e018'
-          }
-        },
+            {
+            selector: 'node',
+            style: {
+              'height': 20,
+              'width': 20,
+              'background-color': '#18e018'
+            }
+            },
 
-        {
-          selector: 'edge',
-          style: {
-            'curve-style': 'haystack',
-            'haystack-radius': 0,
-            'width': 5,
-            'opacity': 0.5,
-            'line-color': '#a2efa2'
-          }
-        }
+            {
+            selector: 'edge',
+            style: {
+              'curve-style': 'haystack',
+              'haystack-radius': 0,
+              'width': 5,
+              'opacity': 0.5,
+              'line-color': '#a2efa2'
+            }
+            },
+            {
+            selector: "node[label]",
+            style: {
+            "label": "data(label)"
+            }
+            },
+
+            {
+            selector: "edge[label]",
+            style: {
+            'label': "data(label)",
+            'width': 3
+            }
+            },
+
+            {
+            selector: ".outline",
+            style: {
+            'color': "#fff",
+            'text-outline-color': "#888",
+            'text-outline-width': 3
+            }
+            }
       ],
 
       elements: data
