@@ -65,7 +65,8 @@
     $(document).ready(function(){
       var cols = 10;
       var rows = 10;
-      var expression = "10"
+      run_the_algorithm(cols, rows);
+      
 
 
 
@@ -84,6 +85,11 @@
         function update_the_header()
         {
           $("#header").text(rows + "x" + cols + " Mesh Network");
+          console.log("cols - " + cols);
+          console.log("rows - " + rows);
+          run_the_algorithm(parseInt(rows, 10), parseInt(cols));
+          
+
         }
 
 

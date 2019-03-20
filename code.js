@@ -2,15 +2,23 @@
 
 
 
-var data = []
-const COLS = 4;
-const ROWS = 10;
+
+// const COLS = 5;
+// const ROWS = 5;
 
 /*
 
       Ivan's original algorithm
 
 */
+
+// run_the_algorithm(COLS, ROWS)
+
+
+function run_the_algorithm(COLS, ROWS){
+
+    
+var data = [];
 
 function node() 
     {
@@ -25,10 +33,13 @@ function node()
 
 var nodes_original = new Array();
 for (var k = 0; k < COLS*ROWS; k++)
-    {
-        nodes_original.push(new node());
-    }
+{
+    nodes_original.push(new node());
+}
 
+
+calculate_nodes_original()
+display_grid()
 
 function calculate_nodes_original()
     {
@@ -311,123 +322,122 @@ function calculate_nodes_original()
         console.log(nodes_original);
     }
 
-calculate_nodes_original()
-display_grid()
+
 
 function display_grid(){
 
-var i, j;
-for (i = 0; i < COLS; i++) {
-  for (j = 0; j < ROWS; j++) {
-    data.push( {
-      "data": {
-        "id": "n-"+i+"-"+j,
-        "weight": 53,
-        // "label": "non"
-      },
-      "position": {
-        "x": 50+110*i,
-        "y": 50+110*j
-      },
-      "group": "nodes",
-      "removed": false,
-      "selected": false,
-      "selectable": true,
-      "locked": false,
-      "grabbable": true,
-      // "classes": "outline"
-    });
-  }
-}
-
-// two for loops for creating edges
-
-for (i = 0; i < COLS; i++) {
-  for (j = 0; j < ROWS; j++) {
-      if(j != ROWS-1) { // if the element is not at the last row
-      data.push({
-        "data": {
-          "id": "e-"+i+"-"+j+"---"+i+"-"+(j+1),
-          "weight": 31,
-          "source": "n-"+i+"-"+j,
-          "target": "n-"+i+"-"+(j+1),
-          "label": nodes_original[j*COLS+i].south
-        },
-        "position": {},
-        "group": "edges",
-        "removed": false,
-        "selected": false,
-        "selectable": true,
-        "locked": true,
-        "grabbable": true,
-        "classes": "outline"
-      });
-    }
-    else // if the element is  at the last row -- wrap around to the 0th row
-    {
-      data.push({
-        "data": {
-          "id": "e-"+i+j+"-"+i+0,
-          "weight": 31,
-          "source": "n-"+i+"-"+j,
-          "target": "n-"+i+"-"+0,
-          "label": nodes_original[j*COLS+i].south
-        },
-        "position": {},
-        "group": "edges",
-        "removed": false,
-        "selected": false,
-        "selectable": true,
-        "locked": true,
-        "grabbable": true,
-        "classes": "outline unbundled-bezier"
-      });
+    var i, j;
+    for (i = 0; i < COLS; i++) {
+      for (j = 0; j < ROWS; j++) {
+        data.push( {
+          "data": {
+            "id": "n-"+i+"-"+j,
+            "weight": 53,
+            // "label": "non"
+          },
+          "position": {
+            "x": 50+110*i,
+            "y": 50+110*j
+          },
+          "group": "nodes",
+          "removed": false,
+          "selected": false,
+          "selectable": true,
+          "locked": false,
+          "grabbable": true,
+          // "classes": "outline"
+        });
+      }
     }
 
+    // two for loops for creating edges
 
-      if(i != COLS-1) { // if the element is not at the last row
-      data.push({ 
-        "data": {
-          "id": "e-"+i+j+"-"+(i+1)+j,
-          "weight": 31,
-          "source": "n-"+i+"-"+j,
-          "target": "n-"+(i+1)+"-"+j,
-          "label": nodes_original[j*COLS+i].east
-        },
-        "position": {},
-        "group": "edges",
-        "removed": false,
-        "selected": false,
-        "selectable": true,
-        "locked": true,
-        "grabbable": true,
-        "classes": "outline"
-      });
+    for (i = 0; i < COLS; i++) {
+      for (j = 0; j < ROWS; j++) {
+          if(j != ROWS-1) { // if the element is not at the last row
+          data.push({
+            "data": {
+              "id": "e-"+i+"-"+j+"---"+i+"-"+(j+1),
+              "weight": 31,
+              "source": "n-"+i+"-"+j,
+              "target": "n-"+i+"-"+(j+1),
+              "label": nodes_original[j*COLS+i].south
+            },
+            "position": {},
+            "group": "edges",
+            "removed": false,
+            "selected": false,
+            "selectable": true,
+            "locked": true,
+            "grabbable": true,
+            "classes": "outline"
+          });
+        }
+        else // if the element is  at the last row -- wrap around to the 0th row
+        {
+          data.push({
+            "data": {
+              "id": "e-"+i+j+"-"+i+0,
+              "weight": 31,
+              "source": "n-"+i+"-"+j,
+              "target": "n-"+i+"-"+0,
+              "label": nodes_original[j*COLS+i].south
+            },
+            "position": {},
+            "group": "edges",
+            "removed": false,
+            "selected": false,
+            "selectable": true,
+            "locked": true,
+            "grabbable": true,
+            "classes": "outline unbundled-bezier"
+          });
+        }
+
+
+          if(i != COLS-1) { // if the element is not at the last row
+          data.push({ 
+            "data": {
+              "id": "e-"+i+j+"-"+(i+1)+j,
+              "weight": 31,
+              "source": "n-"+i+"-"+j,
+              "target": "n-"+(i+1)+"-"+j,
+              "label": nodes_original[j*COLS+i].east
+            },
+            "position": {},
+            "group": "edges",
+            "removed": false,
+            "selected": false,
+            "selectable": true,
+            "locked": true,
+            "grabbable": true,
+            "classes": "outline"
+          });
+        }
+
+        else { // if the element is at the last row -- wrap around
+          data.push({ 
+            "data": {
+              "id": "e-"+i+j+"-"+0+j,
+              "weight": 31,
+              "source": "n-"+i+"-"+j,
+              "target": "n-"+0+"-"+j,
+              "label": nodes_original[j*COLS+i].east
+            },
+            "position": {},
+            "group": "edges",
+            "removed": false,
+            "selected": false,
+            "selectable": true,
+            "locked": true,
+            "grabbable": true,
+            "classes": "outline unbundled-bezier"
+          });
+        }
+      }
     }
 
-    else { // if the element is at the last row -- wrap around
-      data.push({ 
-        "data": {
-          "id": "e-"+i+j+"-"+0+j,
-          "weight": 31,
-          "source": "n-"+i+"-"+j,
-          "target": "n-"+0+"-"+j,
-          "label": nodes_original[j*COLS+i].east
-        },
-        "position": {},
-        "group": "edges",
-        "removed": false,
-        "selected": false,
-        "selectable": true,
-        "locked": true,
-        "grabbable": true,
-        "classes": "outline unbundled-bezier"
-      });
-    }
-  }
-}
-
-  console.log(data);
+    console.log(data);
 
 
     var cy = window.cy = cytoscape({
@@ -491,7 +501,7 @@ for (i = 0; i < COLS; i++) {
               "control-point-distances": 120,
               "control-point-weights": 0.1
             }
-}
+            }
 
 
 
@@ -503,3 +513,5 @@ for (i = 0; i < COLS; i++) {
 
 
 }
+}
+
