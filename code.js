@@ -3,8 +3,8 @@
 
 
 var data = []
-const COLS = 10;
-const ROWS = 5;
+const COLS = 4;
+const ROWS = 10;
 
 /*
 
@@ -35,9 +35,9 @@ function calculate_nodes_original()
         var i = x = y = count = path = j = 0;
         var af = xf = yf = 0.0;
 
-        for (j=0; j<ROWS; j++)
+        for (j=0; j<COLS; j++)
         {
-            for (i=0; i<COLS; i++)
+            for (i=0; i<ROWS; i++)
             {
 
                 //1st quarter
