@@ -1,8 +1,4 @@
 
-
-
-
-
 // const COLS = 5;
 // const ROWS = 5;
 
@@ -29,6 +25,7 @@ function node()
         this.value = 0;
         this.path = 0;
         this.closest_origin = 0;
+        this.dead = false;
     }
 
 var nodes_original = new Array();
@@ -43,6 +40,8 @@ display_grid()
 
 function calculate_nodes_original()
     {
+
+
         var i = x = y = count = path = j = 0;
         var af = xf = yf = 0.0;
 
@@ -71,19 +70,21 @@ function calculate_nodes_original()
                             // console.log("af = ", af)
                             // console.log("yf = ", yf)
                             // console.log("xf = ", xf)
-                            if (((j>=i)&(y-yf<0.5))||((i>j)&(x-xf>0.5)))
+                            if ((((j>=i)&(y-yf<0.5))||((i>j)&(x-xf>0.5))) & (nodes_original[(y*COLS+x-1)<0? (COLS*ROWS - 1):(y*COLS+x-1)].dead == false))
                             {
                                 // move left
                                 nodes_original[y*COLS+x].west++;
-                                nodes_original[y*COLS+x-1].east++;
+                                nodes_original[(y*COLS+x-1)<0? (COLS*ROWS - 1):(y*COLS+x-1)].east++;
                                 x--;
                             }
                             else
                             {
+                                if (nodes_original[((y-1)*COLS+x)<0? (COLS*ROWS+((y-1)*COLS+x)): ((y-1)*COLS+x)].dead == false){
                                 // move up
                                 nodes_original[y*COLS+x].north++;
-                                nodes_original[(y-1)*COLS+x].south++;
+                                nodes_original[((y-1)*COLS+x)<0? (COLS*ROWS+((y-1)*COLS+x)): ((y-1)*COLS+x)].south++;
                                 y--;
+                                }
                             }
                             path--;
                         }
@@ -118,14 +119,14 @@ function calculate_nodes_original()
                                 {
                                     // move up
                                     nodes_original[y*COLS+x].north++;
-                                    nodes_original[(y-1)*COLS+x].south++;
+                                    nodes_original[((y-1)*COLS+x)<0? (COLS*ROWS+((y-1)*COLS+x)): ((y-1)*COLS+x)].south++;
                                     y--;
                                 }
                                 else
                                 {
                                     // move right
                                     nodes_original[y*COLS+x].east++;
-                                    nodes_original[y*COLS+x+1].west++;
+                                    nodes_original[(y*COLS+x+1)%(COLS*ROWS)].west++;
                                     x++;
                                 }
                             }
@@ -144,7 +145,7 @@ function calculate_nodes_original()
                                     {
                                         // move right
                                         nodes_original[y*COLS+x].east++;
-                                        nodes_original[y*COLS+x+1].west++;
+                                        nodes_original[(y*COLS+x+1)%(COLS*ROWS)].west++;
                                         x++;
                                     }
                                 }
@@ -152,7 +153,7 @@ function calculate_nodes_original()
                                 {
                                     // move up
                                     nodes_original[y*COLS+x].north++;
-                                    nodes_original[(y-1)*COLS+x].south++;
+                                    nodes_original[((y-1)*COLS+x)<0? (COLS*ROWS+((y-1)*COLS+x)): ((y-1)*COLS+x)].south++;
                                     y--;
                                 }
                             }
@@ -198,7 +199,7 @@ function calculate_nodes_original()
                                     {
                                         // move down
                                         nodes_original[y*COLS+x].south++;
-                                        nodes_original[(y+1)*COLS+x].north++;
+                                        nodes_original[((y+1)*COLS+x)%(COLS*ROWS)].north++;
                                         y++;
                                     }
                                 }
@@ -206,7 +207,7 @@ function calculate_nodes_original()
                                 {
                                     // move rigth
                                     nodes_original[y*COLS+x].east++;
-                                    nodes_original[y*COLS+x+1].west++;
+                                    nodes_original[(y*COLS+x+1)%(COLS*ROWS)].west++;
                                     x++;
                                 }
                             }
@@ -230,7 +231,7 @@ function calculate_nodes_original()
                                 {
 
                                     nodes_original[y*COLS+x].east++;
-                                    nodes_original[y*COLS+x+1].west++;
+                                    nodes_original[(y*COLS+x+1)%(COLS*ROWS)].west++;
                                     x++;
                                 }
                             }
@@ -239,7 +240,7 @@ function calculate_nodes_original()
                             {
 
                                 nodes_original[y*COLS+x].south++;
-                                nodes_original[(y+1)*COLS+x].north++;
+                                nodes_original[((y+1)*COLS+x)%(COLS*ROWS)].north++;
                                 y++;
                             }
                             path--;
@@ -275,7 +276,7 @@ function calculate_nodes_original()
                                     {
                                         //table[nodes[y*COLS+x].value][nodes[i*COLS+j].value] = 4;
                                         nodes_original[y*COLS+x].south++;
-                                        nodes_original[(y+1)*COLS+x].north++;
+                                        nodes_original[((y+1)*COLS+x)%(COLS*ROWS)].north++;
                                         y++;
                                     }
                                 }
@@ -283,7 +284,7 @@ function calculate_nodes_original()
                                 {
                                     //table[nodes[y*COLS+x].value][nodes[i*COLS+j].value] = 1;
                                     nodes_original[y*COLS+x].west++;
-                                    nodes_original[y*COLS+x-1].east++;
+                                    nodes_original[(y*COLS+x-1)<0? (COLS*ROWS - 1):(y*COLS+x-1)].east++;
                                     x--;
                                 }
                             }
@@ -300,14 +301,14 @@ function calculate_nodes_original()
                                 {
                                     //table[nodes[y*COLS+x].value][nodes[i*COLS+j].value] = 1;
                                     nodes_original[y*COLS+x].west++;
-                                    nodes_original[y*COLS+x-1].east++;
+                                    nodes_original[(y*COLS+x-1)<0? (COLS*ROWS - 1):(y*COLS+x-1)].east++;
                                     x--;
                                 }
                                 else
                                 {
                                     //table[nodes[y*COLS+x].value][nodes[i*COLS+j].value] = 4;
                                     nodes_original[y*COLS+x].south++;
-                                    nodes_original[(y+1)*COLS+x].north++;
+                                    nodes_original[((y+1)*COLS+x)%(COLS*ROWS)].north++;
                                     y++;
                                 }
                             }
@@ -325,6 +326,9 @@ function calculate_nodes_original()
 
 
 function display_grid(){
+            //TESTING DEAD NODES
+        nodes_original[32].dead = true;
+
 
     var i, j;
     for (i = 0; i < COLS; i++) {
@@ -345,7 +349,8 @@ function display_grid(){
           "selectable": true,
           "locked": false,
           "grabbable": true,
-          // "classes": "outline"
+          // if the node is dead, then assign "dead" class which makes the colo red
+           "classes": nodes_original[j*COLS+i].dead?"dead":""
         });
       }
     }
@@ -491,6 +496,16 @@ function display_grid(){
             'color': "#fff",
             'text-outline-color': "#888",
             'text-outline-width': 3
+            }
+            },
+
+            {
+            selector: ".dead",
+            style: {
+            'color': "#fff",
+            'text-outline-color': "#888",
+            'text-outline-width': 3,
+            'background-color': '#e01717'
             }
             },
 
