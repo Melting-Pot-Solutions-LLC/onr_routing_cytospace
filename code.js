@@ -11,7 +11,7 @@
 // run_the_algorithm(COLS, ROWS)
 
 
-function run_the_algorithm(COLS, ROWS){
+function run_the_algorithm(COLS, ROWS, dead_node=0){
 
     
 var data = [];
@@ -32,6 +32,7 @@ var nodes_original = new Array();
 for (var k = 0; k < COLS*ROWS; k++)
 {
     nodes_original.push(new node());
+    if(dead_node == k) nodes_original[k].dead = true;
 }
 
 
@@ -326,9 +327,6 @@ function calculate_nodes_original()
 
 
 function display_grid(){
-            //TESTING DEAD NODES
-        nodes_original[32].dead = true;
-
 
     var i, j;
     for (i = 0; i < COLS; i++) {
@@ -336,7 +334,7 @@ function display_grid(){
         data.push( {
           "data": {
             "id": "n-"+i+"-"+j,
-            "weight": 53,
+            "weight": j*COLS+i,
             // "label": "non"
           },
           "position": {
@@ -350,7 +348,8 @@ function display_grid(){
           "locked": false,
           "grabbable": true,
           // if the node is dead, then assign "dead" class which makes the colo red
-           "classes": nodes_original[j*COLS+i].dead?"dead":""
+          "classes": (dead_node==("n-"+i+"-"+j))?"dead":""
+           // "classes": nodes_original[j*COLS+i].dead?"dead":""
         });
       }
     }
@@ -523,6 +522,16 @@ function display_grid(){
       ],
 
       elements: data
+    });
+
+    cy.on('tap', 'node', function(evt){
+      var node = evt.target;
+      // console.log( 'tapped ' + JSON.stringify(node.json()) );
+      // console.log( 'tapped ' + JSON.stringify(node.json()) );
+      var node_json = JSON.stringify(node.json());
+      var index_of_weight = node_json.indexOf("weight")
+      var dead_node_id = parseInt(node_json.substring(index_of_weight+8, index_of_weight+11));
+      run_the_algorithm(parseInt(COLS), parseInt(ROWS), dead_node_id);
     });
 
 
