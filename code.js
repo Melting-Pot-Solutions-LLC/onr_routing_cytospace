@@ -11,7 +11,7 @@
 // run_the_algorithm(COLS, ROWS)
 
 
-function run_the_algorithm(COLS, ROWS, dead_node=0){
+function run_the_algorithm(COLS, ROWS, dead_node=-1){
 
     
 var data = [];
@@ -32,7 +32,7 @@ var nodes_original = new Array();
 for (var k = 0; k < COLS*ROWS; k++)
 {
     nodes_original.push(new node());
-    if(dead_node == k) nodes_original[k].dead = true;
+    // if(dead_node == k) nodes_original[k].dead = true;
 }
 
 
@@ -54,7 +54,7 @@ function calculate_nodes_original()
                 //1st quarter
                 if ((j<=(COLS%2==0 ? Math.floor(COLS/2) : Math.floor(COLS/2))) && (i<=(ROWS%2==0 ? Math.floor(ROWS/2-1) : Math.floor(ROWS/2-1))))
                 {
-                    nodes_original[y*COLS+x].value = i*COLS + j;
+                    // nodes_original[y*COLS+x].value = i*COLS + j;
                     x = j;
                     y = i;
                     af = (y)/(x); // angle tangent 
@@ -348,7 +348,7 @@ function display_grid(){
           "locked": false,
           "grabbable": true,
           // if the node is dead, then assign "dead" class which makes the colo red
-          "classes": (dead_node==("n-"+i+"-"+j))?"dead":""
+          "classes": (dead_node==j*COLS+i)?"dead":""
            // "classes": nodes_original[j*COLS+i].dead?"dead":""
         });
       }
