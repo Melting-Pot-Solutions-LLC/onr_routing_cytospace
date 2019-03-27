@@ -266,17 +266,28 @@ function display_grid(){
         var aStar = cy.elements().aStar({ root: "#n-0-0", goal: "#n-"+i+"-"+j, weight: function(edge){
   return edge.data('weight');
 } });
-        if (aStar.distance > (i+j)) console.log("ERROR: THE MINIMAL PATH IS LONGER THAN MINIMIUM HOP COUNT");
+        if (aStar.distance > (i+j)){ 
+          console.log("ERROR: THE MINIMAL PATH IS LONGER THAN MINIMIUM HOP COUNT");
+          console.log("the hop count is " + (i+j) + " as x = " + i + " and y = " + j);
+          console.log("but the distance " + aStar.distance);
+          console.log(aStar.path);
+        }
         if (!aStar.found) console.log("ERROR: MINUMUM PATH NOT FOUND");
 
             // console.log(aStar.path);
             var k;
             for ( k=0; k<aStar.path.length; k++ ) {  
                 if(aStar.path[k].isEdge()){ 
-                    console.log(aStar.path[k].id());
+                    //console.log(aStar.path[k].id());
                     //chnage the weigth
-                    console.log(cy.$("#"+aStar.path[k].id()).data());
-                    cy.$("#"+aStar.path[k].id()).data.weight += 1;
+                    // console.log(cy.$("#"+aStar.path[k].id()).data());
+                    // console.log(cy.$("#"+aStar.path[k].id()).data().weight);
+                    var current_weight = cy.$("#"+aStar.path[k].id()).data().weight;
+                    current_weight++;
+                    // cy.$("#"+aStar.path[k].id()).data.weight += 1;
+                    cy.$("#"+aStar.path[k].id()).json({"data":{"weight":current_weight}});
+                    cy.$("#"+aStar.path[k].id()).json({"data":{"label":current_weight}});
+                    // console.log(cy.$("#"+aStar.path[k].id()).data());
 
                 }
             }
