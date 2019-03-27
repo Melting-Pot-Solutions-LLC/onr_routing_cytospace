@@ -266,10 +266,54 @@ function display_grid(){
         var aStar = cy.elements().aStar({ root: "#n-0-0", goal: "#n-"+i+"-"+j, weight: function(edge){
   return edge.data('weight');
 } });
-        if (aStar.distance > (i+j)){ 
+
+        var minimum_hop_count;
+
+
+        // checking the quater the node is in
+        if ((i<=(COLS%2==0 ? Math.floor(COLS/2) : Math.floor(COLS/2))) && (j<=(ROWS%2==0 ? Math.floor(ROWS/2-1) : Math.floor(ROWS/2-1)))) //1st quater
+        {
+            minimum_hop_count = i+j;
+          //    console.log("\n");
+          // console.log(cy.$("#n-"+i+"-"+j).id());
+          // console.log("minimum_hop_count - " + minimum_hop_count);
+
+        }
+        else if((i>=(COLS%2==0 ? Math.floor(COLS/2+1) : Math.floor(COLS/2+1))) && (j<=(ROWS%2==0 ? Math.floor(ROWS/2-1) : Math.floor(ROWS/2)))) 
+        {
+            minimum_hop_count = j+COLS-i;
+          //    console.log("\n");
+          // console.log(cy.$("#n-"+i+"-"+j).id());
+          // console.log("minimum_hop_count - " + minimum_hop_count);
+
+        }
+        else if ((i>=(COLS%2==0 ? Math.floor(COLS/2) : Math.floor(COLS/2+1))) && (j>=(ROWS%2==0 ? Math.floor(ROWS/2) : Math.floor(ROWS/2+1))))
+        {
+            minimum_hop_count = ROWS-j+COLS-i;
+          //    console.log("\n");
+          // console.log(cy.$("#n-"+i+"-"+j).id());
+          // console.log("minimum_hop_count - " + minimum_hop_count);
+
+        }
+        else if ((i<=(COLS%2==0 ? Math.floor(COLS/2-1) : Math.floor(COLS/2))) && (j>=(ROWS%2==0 ? Math.floor(ROWS/2) : Math.floor(ROWS/2))))
+        {
+            minimum_hop_count = ROWS-j+i;
+          //    console.log("\n");
+          // console.log(cy.$("#n-"+i+"-"+j).id());
+          // console.log("minimum_hop_count - " + minimum_hop_count);
+
+        }
+        else 
+          console.log("ERROR: THE QUATER FOR THE NODE WAS NOT DETECTED");
+
+
+         
+
+        if ((aStar.path.length - 1)/2 > minimum_hop_count){ 
+          console.log("\n");
           console.log("ERROR: THE MINIMAL PATH IS LONGER THAN MINIMIUM HOP COUNT");
-          console.log("the hop count is " + (i+j) + " as x = " + i + " and y = " + j);
-          console.log("but the distance " + aStar.distance);
+          console.log("the hop count is " + minimum_hop_count);
+          console.log("but the distance " + (aStar.path.length - 1)/2);
           console.log(aStar.path);
         }
         if (!aStar.found) console.log("ERROR: MINUMUM PATH NOT FOUND");
