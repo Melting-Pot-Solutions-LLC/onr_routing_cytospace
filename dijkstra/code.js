@@ -312,9 +312,10 @@ function display_grid(){
         if ((aStar.path.length - 1)/2 > minimum_hop_count){ 
           console.log("\n");
           console.log("ERROR: THE MINIMAL PATH IS LONGER THAN MINIMIUM HOP COUNT");
-          console.log("the hop count is " + minimum_hop_count);
-          console.log("but the distance " + (aStar.path.length - 1)/2);
-          console.log(aStar.path);
+          console.log("the minimum hop count is " + minimum_hop_count);
+          console.log("but actual hop count " + (aStar.path.length - 1)/2);
+          console.log("the distance (weight of the path) " + aStar.distance);
+          // console.log(aStar.path);
         }
         if (!aStar.found) console.log("ERROR: MINUMUM PATH NOT FOUND");
 
@@ -338,6 +339,37 @@ function display_grid(){
 
       }
     }
+    console.log(cy.elements().length);
+    var el = cy.remove('#n-9-9');
+    console.log(cy.elements().length);
+    el.restore();
+    console.log(cy.elements().length);
+
+/*
+    // for every node
+    var m,l;
+    for (i = 0; i < COLS; i++) {
+      for (j = 0; j < ROWS; j++) {
+
+        if (i == 0 & j == 0) continue;
+        var removed_nodes = [];
+        for (m = 0; m < COLS; m++) {
+          for (l = 0; l < ROWS; l++) {
+            if() // the element is not in the subgraph of being in the shortest path between origin and the destination, then remove
+            {
+              //remove
+              //removed_nodes.push();
+            }
+          }
+        }
+
+        // run astar (origin -> node)
+        // update the weights of the graph
+        // restore all the deleted elements
+
+      }
+    }
+    */
 
 
 
@@ -345,4 +377,5 @@ function display_grid(){
 
 }
 }
+
 
