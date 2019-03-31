@@ -256,120 +256,153 @@ function display_grid(){
 
 
     // calculate the weights using minimal path algorithm
-    // var dijkstra = cy.elements().dijkstra('#n-0-0', function(edge){
-    //         return edge.data('weight');});
+    
     var i, j;
-    for (i = 0; i < COLS; i++) {
-      for (j = 0; j < ROWS; j++) {
-        if(i==0 & j==0) continue; // skip the master
+//     for (i = 0; i < COLS; i++) {
+//       for (j = 0; j < ROWS; j++) {
+//         if(i==0 & j==0) continue; // skip the master
 
-        var aStar = cy.elements().aStar({ root: "#n-0-0", goal: "#n-"+i+"-"+j, weight: function(edge){
-  return edge.data('weight');
-} });
+//         var aStar = cy.elements().aStar({ root: "#n-0-0", goal: "#n-"+i+"-"+j, weight: function(edge){
+//   return edge.data('weight');
+// } });
 
-        var minimum_hop_count;
+//         var minimum_hop_count;
 
 
-        // checking the quater the node is in
-        if ((i<=(COLS%2==0 ? Math.floor(COLS/2) : Math.floor(COLS/2))) && (j<=(ROWS%2==0 ? Math.floor(ROWS/2-1) : Math.floor(ROWS/2-1)))) //1st quater
-        {
-            minimum_hop_count = i+j;
-          //    console.log("\n");
-          // console.log(cy.$("#n-"+i+"-"+j).id());
-          // console.log("minimum_hop_count - " + minimum_hop_count);
+//         // checking the quater the node is in
+//         if ((i<=(COLS%2==0 ? Math.floor(COLS/2) : Math.floor(COLS/2))) && (j<=(ROWS%2==0 ? Math.floor(ROWS/2-1) : Math.floor(ROWS/2-1)))) //1st quater
+//         {
+//             minimum_hop_count = i+j;
+//           //    console.log("\n");
+//           // console.log(cy.$("#n-"+i+"-"+j).id());
+//           // console.log("minimum_hop_count - " + minimum_hop_count);
 
-        }
-        else if((i>=(COLS%2==0 ? Math.floor(COLS/2+1) : Math.floor(COLS/2+1))) && (j<=(ROWS%2==0 ? Math.floor(ROWS/2-1) : Math.floor(ROWS/2)))) 
-        {
-            minimum_hop_count = j+COLS-i;
-          //    console.log("\n");
-          // console.log(cy.$("#n-"+i+"-"+j).id());
-          // console.log("minimum_hop_count - " + minimum_hop_count);
+//         }
+//         else if((i>=(COLS%2==0 ? Math.floor(COLS/2+1) : Math.floor(COLS/2+1))) && (j<=(ROWS%2==0 ? Math.floor(ROWS/2-1) : Math.floor(ROWS/2)))) 
+//         {
+//             minimum_hop_count = j+COLS-i;
+//           //    console.log("\n");
+//           // console.log(cy.$("#n-"+i+"-"+j).id());
+//           // console.log("minimum_hop_count - " + minimum_hop_count);
 
-        }
-        else if ((i>=(COLS%2==0 ? Math.floor(COLS/2) : Math.floor(COLS/2+1))) && (j>=(ROWS%2==0 ? Math.floor(ROWS/2) : Math.floor(ROWS/2+1))))
-        {
-            minimum_hop_count = ROWS-j+COLS-i;
-          //    console.log("\n");
-          // console.log(cy.$("#n-"+i+"-"+j).id());
-          // console.log("minimum_hop_count - " + minimum_hop_count);
+//         }
+//         else if ((i>=(COLS%2==0 ? Math.floor(COLS/2) : Math.floor(COLS/2+1))) && (j>=(ROWS%2==0 ? Math.floor(ROWS/2) : Math.floor(ROWS/2+1))))
+//         {
+//             minimum_hop_count = ROWS-j+COLS-i;
+//           //    console.log("\n");
+//           // console.log(cy.$("#n-"+i+"-"+j).id());
+//           // console.log("minimum_hop_count - " + minimum_hop_count);
 
-        }
-        else if ((i<=(COLS%2==0 ? Math.floor(COLS/2-1) : Math.floor(COLS/2))) && (j>=(ROWS%2==0 ? Math.floor(ROWS/2) : Math.floor(ROWS/2))))
-        {
-            minimum_hop_count = ROWS-j+i;
-          //    console.log("\n");
-          // console.log(cy.$("#n-"+i+"-"+j).id());
-          // console.log("minimum_hop_count - " + minimum_hop_count);
+//         }
+//         else if ((i<=(COLS%2==0 ? Math.floor(COLS/2-1) : Math.floor(COLS/2))) && (j>=(ROWS%2==0 ? Math.floor(ROWS/2) : Math.floor(ROWS/2))))
+//         {
+//             minimum_hop_count = ROWS-j+i;
+//           //    console.log("\n");
+//           // console.log(cy.$("#n-"+i+"-"+j).id());
+//           // console.log("minimum_hop_count - " + minimum_hop_count);
 
-        }
-        else 
-          console.log("ERROR: THE QUATER FOR THE NODE WAS NOT DETECTED");
+//         }
+//         else 
+//           console.log("ERROR: THE QUATER FOR THE NODE WAS NOT DETECTED");
 
 
          
 
-        if ((aStar.path.length - 1)/2 > minimum_hop_count){ 
-          console.log("\n");
-          console.log("ERROR: THE MINIMAL PATH IS LONGER THAN MINIMIUM HOP COUNT");
-          console.log("the minimum hop count is " + minimum_hop_count);
-          console.log("but actual hop count " + (aStar.path.length - 1)/2);
-          console.log("the distance (weight of the path) " + aStar.distance);
-          // console.log(aStar.path);
-        }
-        if (!aStar.found) console.log("ERROR: MINUMUM PATH NOT FOUND");
+//         if ((aStar.path.length - 1)/2 > minimum_hop_count){ 
+//           console.log("\n");
+//           console.log("ERROR: THE MINIMAL PATH IS LONGER THAN MINIMIUM HOP COUNT");
+//           console.log("the minimum hop count is " + minimum_hop_count);
+//           console.log("but actual hop count " + (aStar.path.length - 1)/2);
+//           console.log("the distance (weight of the path) " + aStar.distance);
+//           // console.log(aStar.path);
+//         }
+//         if (!aStar.found) console.log("ERROR: MINUMUM PATH NOT FOUND");
 
-            // console.log(aStar.path);
-            var k;
-            for ( k=0; k<aStar.path.length; k++ ) {  
-                if(aStar.path[k].isEdge()){ 
-                    //console.log(aStar.path[k].id());
-                    //chnage the weigth
-                    // console.log(cy.$("#"+aStar.path[k].id()).data());
-                    // console.log(cy.$("#"+aStar.path[k].id()).data().weight);
-                    var current_weight = cy.$("#"+aStar.path[k].id()).data().weight;
-                    current_weight++;
-                    // cy.$("#"+aStar.path[k].id()).data.weight += 1;
-                    cy.$("#"+aStar.path[k].id()).json({"data":{"weight":current_weight}});
-                    cy.$("#"+aStar.path[k].id()).json({"data":{"label":current_weight}});
-                    // console.log(cy.$("#"+aStar.path[k].id()).data());
+//             // console.log(aStar.path);
+//             var k;
+//             for ( k=0; k<aStar.path.length; k++ ) {  
+//                 if(aStar.path[k].isEdge()){ 
+//                     //console.log(aStar.path[k].id());
+//                     //chnage the weigth
+//                     // console.log(cy.$("#"+aStar.path[k].id()).data());
+//                     // console.log(cy.$("#"+aStar.path[k].id()).data().weight);
+//                     var current_weight = cy.$("#"+aStar.path[k].id()).data().weight;
+//                     current_weight++;
+//                     // cy.$("#"+aStar.path[k].id()).data.weight += 1;
+//                     cy.$("#"+aStar.path[k].id()).json({"data":{"weight":current_weight}});
+//                     cy.$("#"+aStar.path[k].id()).json({"data":{"label":current_weight}});
+//                     // console.log(cy.$("#"+aStar.path[k].id()).data());
 
-                }
-            }
+//                 }
+//             }
 
-      }
-    }
-    console.log(cy.elements().length);
-    var el = cy.remove('#n-9-9');
-    console.log(cy.elements().length);
-    el.restore();
-    console.log(cy.elements().length);
+//       }
+//     }
+    // console.log(cy.elements().length);
+    // var el = cy.remove('#n-9-9');
+    // console.log(cy.elements().length);
+    // el.restore();
+    // console.log(cy.elements().length);
+    // console.log(minimum_hop_count_between_nodes("#n-0-0", '#n-2-2'));
 
-/*
+
     // for every node
     var m,l;
+    for (j = 0; j < ROWS; j++) {
     for (i = 0; i < COLS; i++) {
-      for (j = 0; j < ROWS; j++) {
-
-        if (i == 0 & j == 0) continue;
+      
+        // i = 7;
+        // j=2;
+        if (i == 0 && j == 0) continue;
+        
         var removed_nodes = [];
+
         for (m = 0; m < COLS; m++) {
           for (l = 0; l < ROWS; l++) {
-            if() // the element is not in the subgraph of being in the shortest path between origin and the destination, then remove
+          
+            if (m == 0 && l == 0) continue;
+            var origin = "#n-0-0";
+            var el = "#n-"+m+"-"+l;
+            var destination = "#n-"+i+"-"+j;
+            if((!path_exists_between_nodes(origin, el) || !path_exists_between_nodes(el, destination) || !path_exists_between_nodes(origin, destination)) || (minimum_hop_count_between_nodes(origin, el) + minimum_hop_count_between_nodes(el, destination) > minimum_hop_count_between_nodes(origin, destination))) // the element is not in the subgraph of being in the shortest path between origin and the destination, then remove
             {
-              //remove
-              //removed_nodes.push();
+              //remove node outside of the subgraph
+              removed_nodes.push(cy.remove("#n-"+m+"-"+l));
+
             }
           }
         }
 
-        // run astar (origin -> node)
-        // update the weights of the graph
-        // restore all the deleted elements
 
+        // run astar (origin -> node)
+        var aStar2 = cy.elements().aStar({ root: "#n-0-0", goal: "#n-"+i+"-"+j, weight: function(edge){
+  return edge.data('weight');
+} });
+        // update the weights of the graph
+        if (!aStar2.found) console.log("ERROR: MINUMUM PATH NOT FOUND");
+
+            // console.log(aStar.path);
+            var k;
+            for ( k=0; k<aStar2.path.length; k++ ) {  
+                if(aStar2.path[k].isEdge()){ 
+                    //chnage the weigth
+                    var current_weight = cy.$("#"+aStar2.path[k].id()).data().weight;
+                    current_weight++;
+                    cy.$("#"+aStar2.path[k].id()).json({"data":{"weight":current_weight}});
+                    cy.$("#"+aStar2.path[k].id()).json({"data":{"label":current_weight}});
+                }
+            }
+        // restore all the deleted elements
+        for (k = removed_nodes.length-1; k >= 0; k--) { 
+  removed_nodes[k].restore();
+}
+      
       }
     }
-    */
+    
+
+    
+
 
 
 
@@ -378,4 +411,13 @@ function display_grid(){
 }
 }
 
+  function minimum_hop_count_between_nodes(node1, node2) {
+    var ret = cy.elements().aStar({ root: node1, goal: node2 }).distance;
+    return ret;
+    }
+
+    function path_exists_between_nodes(node1, node2) {
+      var ret = cy.elements().aStar({ root: node1, goal: node2 }).found;
+    return ret;
+    }
 
