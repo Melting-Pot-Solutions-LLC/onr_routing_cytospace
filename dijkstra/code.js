@@ -347,9 +347,16 @@ function display_grid(){
 
 
     // for every node
-    var m,l;
+    var m,l,radius;
+
+    for(radius = 1 ; radius <= COLS + ROWS; radius++) { // traverse in circles
+      // radius = 2;
+      for (i = 0; i < COLS; i++) {
     for (j = 0; j < ROWS; j++) {
-    for (i = 0; i < COLS; i++) {
+    
+      var origin = "#n-0-0";
+      var destination = "#n-"+i+"-"+j;
+      if(minimum_hop_count_between_nodes(origin, destination) != radius) continue;
       
         // i = 7;
         // j=2;
@@ -361,9 +368,9 @@ function display_grid(){
           for (l = 0; l < ROWS; l++) {
           
             if (m == 0 && l == 0) continue;
-            var origin = "#n-0-0";
+            
             var el = "#n-"+m+"-"+l;
-            var destination = "#n-"+i+"-"+j;
+            
             if((!path_exists_between_nodes(origin, el) || !path_exists_between_nodes(el, destination) || !path_exists_between_nodes(origin, destination)) || (minimum_hop_count_between_nodes(origin, el) + minimum_hop_count_between_nodes(el, destination) > minimum_hop_count_between_nodes(origin, destination))) // the element is not in the subgraph of being in the shortest path between origin and the destination, then remove
             {
               //remove node outside of the subgraph
@@ -399,6 +406,8 @@ function display_grid(){
       
       }
     }
+
+  }
     
 
     
