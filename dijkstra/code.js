@@ -11,7 +11,7 @@
 // run_the_algorithm(COLS, ROWS)
 
 
-function run_the_algorithm(COLS, ROWS, dead_node=-1){
+function run_the_algorithm(COLS, ROWS, dead_node=""){
 
     
 var data = [];
@@ -242,15 +242,24 @@ function display_grid(){
       elements: data
     });
 
+
+    // delete a dead node
+    if(dead_node != "")
+      cy.remove(dead_node);
+
     // highlight the node which we clicked on
     cy.on('tap', 'node', function(evt){
       var node = evt.target;
       // console.log( 'tapped ' + JSON.stringify(node.json()) );
       // console.log( 'tapped ' + JSON.stringify(node.json()) );
       var node_json = JSON.stringify(node.json());
-      var index_of_weight = node_json.indexOf("weight")
-      var dead_node_id = parseInt(node_json.substring(index_of_weight+8, index_of_weight+11));
-      run_the_algorithm(parseInt(COLS), parseInt(ROWS), dead_node_id);
+      // console.log(node_json);
+      // console.log(node_json["data"]);
+      console.log("deleting the node " + node.id());
+      var index_of_weight = node_json.indexOf("id")
+      var dead_node_id = parseInt(node_json.substring(index_of_weight+5, index_of_weight+13));
+      
+      run_the_algorithm(parseInt(COLS), parseInt(ROWS), "#"+node.id());
     });
 
 
@@ -377,7 +386,7 @@ function display_grid(){
             for (ii = ll; ii < nn; ++ii) 
             { 
               // console.log("#n-"+kk+"-"+ii);
-              process_node(ii, kk, radius, COLS, ROWS);
+              process_node(ii, kk, radius, COLS, ROWS, dead_node);
             } 
             kk++; 
    
@@ -385,7 +394,7 @@ function display_grid(){
             for (ii = kk; ii < mm; ++ii) 
             { 
               // console.log("#n-"+ii+"-"+(nn-1));
-              process_node((nn-1), ii, radius, COLS, ROWS);
+              process_node((nn-1), ii, radius, COLS, ROWS, dead_node);
             } 
             nn--; 
    
@@ -395,7 +404,7 @@ function display_grid(){
                 for (ii = nn-1; ii >= ll; --ii) 
                 { 
                   // console.log("#n-"+(mm-1)+"-"+ii);
-                  process_node(ii, (mm-1), radius, COLS, ROWS);
+                  process_node(ii, (mm-1), radius, COLS, ROWS, dead_node);
                 } 
                 mm--; 
             } 
@@ -406,7 +415,7 @@ function display_grid(){
                 for (ii = mm-1; ii >= kk; --ii) 
                 { 
                   // console.log("#n-"+ii+"-"+ll);
-                  process_node(ll, ii, radius, COLS, ROWS);
+                  process_node(ll, ii, radius, COLS, ROWS, dead_node);
                 } 
                 ll++;     
             }         
@@ -474,12 +483,17 @@ function display_grid(){
 }
 
 
-function process_node(i, j, radius, COLS, ROWS)
+function process_node(i, j, radius, COLS, ROWS, dead_node)
 {
     
       var origin = "#n-0-0";
       var destination = "#n-"+i+"-"+j;
+
+      if(destination == dead_node) return;
+      // console.log(destination);
+      // console.log(dead_node);
       if(minimum_hop_count_between_nodes(origin, destination) != radius) return;
+      
       
         // i = 7;
         // j=2;
@@ -491,8 +505,10 @@ function process_node(i, j, radius, COLS, ROWS)
           for (l = 0; l < ROWS; l++) {
           
             if (m == 0 && l == 0) continue;
+
             
             var el = "#n-"+m+"-"+l;
+            if(el == dead_node) continue;
             
             if((!path_exists_between_nodes(origin, el) || !path_exists_between_nodes(el, destination) || !path_exists_between_nodes(origin, destination)) || (minimum_hop_count_between_nodes(origin, el) + minimum_hop_count_between_nodes(el, destination) > minimum_hop_count_between_nodes(origin, destination))) // the element is not in the subgraph of being in the shortest path between origin and the destination, then remove
             {
