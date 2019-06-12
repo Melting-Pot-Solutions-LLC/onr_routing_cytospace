@@ -276,6 +276,7 @@ function display_grid(){
     cy.$("#n-"+0+"-"+(ROWS-1)).json({"data":{"weight":1}});
 
     var number_of_routs = 1;
+    var final_array_of_paths = []
     for(radius = 1 ; radius <= COLS + ROWS; radius++) {
       // for (j = 0; j < ROWS; j++) {
       //   for (i = 0; i < COLS; i++) {
@@ -299,7 +300,8 @@ function display_grid(){
             for (ii = ll; ii < nn; ++ii) 
             { 
               // console.log("#n-"+kk+"-"+ii);
-              number_of_routs = number_of_routs * calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node);
+              // number_of_routs = number_of_routs * calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node);
+              final_array_of_paths.push(calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node));
             } 
             kk++; 
    
@@ -307,7 +309,8 @@ function display_grid(){
             for (ii = kk; ii < mm; ++ii) 
             { 
               // console.log("#n-"+ii+"-"+(nn-1));
-              number_of_routs = number_of_routs * calculate_routes_from_node((nn-1), ii, radius, COLS, ROWS, dead_node);
+              // number_of_routs = number_of_routs * calculate_routes_from_node((nn-1), ii, radius, COLS, ROWS, dead_node);
+              final_array_of_paths.push(calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node));
             } 
             nn--; 
    
@@ -317,7 +320,8 @@ function display_grid(){
                 for (ii = nn-1; ii >= ll; --ii) 
                 { 
                   // console.log("#n-"+(mm-1)+"-"+ii);
-                  number_of_routs = number_of_routs * calculate_routes_from_node(ii, (mm-1), radius, COLS, ROWS, dead_node);
+                  // number_of_routs = number_of_routs * calculate_routes_from_node(ii, (mm-1), radius, COLS, ROWS, dead_node);
+                  final_array_of_paths.push(calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node));
                 } 
                 mm--; 
             } 
@@ -328,7 +332,8 @@ function display_grid(){
                 for (ii = mm-1; ii >= kk; --ii) 
                 { 
                   // console.log("#n-"+ii+"-"+ll);
-                  number_of_routs = number_of_routs * calculate_routes_from_node(ll, ii, radius, COLS, ROWS, dead_node);
+                  // number_of_routs = number_of_routs * calculate_routes_from_node(ll, ii, radius, COLS, ROWS, dead_node);
+                  final_array_of_paths.push(calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node));
                 } 
                 ll++;     
             }         
@@ -340,7 +345,16 @@ function display_grid(){
     }
 
 
-    console.log("Number of the possible routes - " + number_of_routs);
+    // console.log("Number of the possible routes - " + number_of_routs);
+    var filtered = final_array_of_paths.filter(function(value, index, arr){
+
+    return value != 1;
+
+    });
+    console.log("Final array of routes  ");
+    console.log(filtered);
+        
+
 
 
 
@@ -553,15 +567,58 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
   ret = ret + cy.$("#n-"+i+"-"+j).data('weight');
 
 
-  // restore all the deleted elements
-  for (k = removed_nodes.length-1; k >= 0; k--) { 
-    removed_nodes[k].restore();
-  }
+
+       var paths_for_current_node = [];
+
+  if (ROWS == 3 && COLS == 3)
+    {
+
+      function perm(a) {
+          if (a.length < 2) return [a];
+          var c, d, b = [];
+          for (c = 0; c < a.length; c++) {
+              var e = a.splice(c, 1),
+                  f = perm(a);
+              for (d = 0; d < f.length; d++) b.push([e].concat(f[d]));
+              a.splice(c, 0, e[0])
+          } return b
+      }
+       
+
+       // var array_of_paths = [];
+
+      
+      console.log("for " + i + "-" + j);
+      var ar = cy.nodes().toArray();
+      // console.log(perm(ar).join("\n"));
+
+      
+      var ar1 = perm(ar);
+      for (var p = 0; p < ar1.length; p++) {
+        if (ar1[p][ar1[p].length-1][0].data("id") == cy.$("#n-0-0").data("id") && ar1[p][0][0].data("id") == cy.$("#n-"+i+"-"+j).data("id")  ) paths_for_current_node.push(ar1[p]);
+      // if(ar1[p][0][0].json() == cy.$("#n-0-0").json()) console.log("EXCLUDE THIS PATH!");
+      
+      }
+
+      // console.log("paths from current node = ");
+      // console.log(paths_for_current_node);
+
+    
+
+    }
+
+
+      // restore all the deleted elements
+      for (k = removed_nodes.length-1; k >= 0; k--) { 
+        removed_nodes[k].restore();
+      }
+    
 
   //assign the number of paths to this node
   cy.$("#n-"+i+"-"+j).json({"data":{"weight":ret}});
 
-  return ret;
+   return paths_for_current_node;
+  // return ret;
 
 }
 
