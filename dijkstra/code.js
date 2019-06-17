@@ -573,35 +573,123 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
   if (ROWS == 3 && COLS == 3)
     {
 
-      function perm(a) {
-          if (a.length < 2) return [a];
-          var c, d, b = [];
-          for (c = 0; c < a.length; c++) {
-              var e = a.splice(c, 1),
-                  f = perm(a);
-              for (d = 0; d < f.length; d++) b.push([e].concat(f[d]));
-              a.splice(c, 0, e[0])
-          } return b
-      }
+      // function perm(a) {
+      //     if (a.length < 2) return [a];
+      //     var c, d, b = [];
+      //     for (c = 0; c < a.length; c++) {
+      //         var e = a.splice(c, 1),
+      //             f = perm(a);
+      //         for (d = 0; d < f.length; d++) b.push([e].concat(f[d]));
+      //         a.splice(c, 0, e[0])
+      //     } return b
+      // }
        
 
        // var array_of_paths = [];
 
       
       console.log("for " + i + "-" + j);
-      var ar = cy.nodes().toArray();
-      // console.log(perm(ar).join("\n"));
+      // var ar = cy.nodes().toArray();
+      // // console.log(perm(ar).join("\n"));
 
       
-      var ar1 = perm(ar);
-      for (var p = 0; p < ar1.length; p++) {
-        if (ar1[p][ar1[p].length-1][0].data("id") == cy.$("#n-0-0").data("id") && ar1[p][0][0].data("id") == cy.$("#n-"+i+"-"+j).data("id")  ) paths_for_current_node.push(ar1[p]);
-      // if(ar1[p][0][0].json() == cy.$("#n-0-0").json()) console.log("EXCLUDE THIS PATH!");
+      // var ar1 = perm(ar);
+      // for (var p = 0; p < ar1.length; p++) {
+      //   if (ar1[p][ar1[p].length-1][0].data("id") == cy.$("#n-0-0").data("id") && ar1[p][0][0].data("id") == cy.$("#n-"+i+"-"+j).data("id")  ) paths_for_current_node.push(ar1[p]);
       
+      // }
+
+      var global_paths
+      function find_paths(current_path)
+      {
+        // console.log(current_path[current_path.length-1].data("id"));
+        if(current_path[current_path.length-1].data("id") == "n-0-0") // if we found the Master - finish searching
+          //TODO need to check the length of the path
+          paths_for_current_node.push(current_path);
+        else {
+          //get the last element of the path
+          current_path[current_path.length-1].data("id")
+
+          var top_p_i, top_p_j, bot_p_i, bot_p_j, left_p_i, left_p_j, right_p_i, right_p_j;
+          // console.log(current_path[current_path.length-1].data("id"));
+          var current_i_j = extract_i_j_from_id(current_path[current_path.length-1].data("id"));
+
+          // node above
+          if (current_i_j[1] == 0) top_p_j = ROWS - 1;
+          else top_p_j = current_i_j[1]-1;
+          top_p_i = current_i_j[0];
+
+          // left node
+          if (current_i_j[0] == 0) left_p_i = COLS - 1;
+          else left_p_i = current_i_j[0]-1;
+          left_p_j = current_i_j[1];
+
+          // right node
+          if (current_i_j[0] == COLS-1) right_p_i = 0;
+          else right_p_i = current_i_j[0]+1;
+          right_p_j = current_i_j[1];
+
+          // node below
+          if (current_i_j[1] == ROWS - 1) bot_p_j = 0;
+          else bot_p_j = current_i_j[1]+1;
+          bot_p_i = current_i_j[0];
+
+          // if the element above is in the subgraph
+          if(cy.$("#n-"+top_p_i+"-"+top_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, top_p_i, top_p_j)) // if that element was not visited before
+            {
+              var clone_top = current_path.slice(0);
+              clone_top.push(cy.$("#n-"+top_p_i+"-"+top_p_j));
+              find_paths(clone_top);
+            }
+          }
+
+          // if the element below is in the subgraph
+          if(cy.$("#n-"+bot_p_i+"-"+bot_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, bot_p_i, bot_p_j)) // if that element was not visited before
+            {
+              var clone_bot = current_path.slice(0);
+              clone_bot.push(cy.$("#n-"+bot_p_i+"-"+bot_p_j));
+              find_paths(clone_bot);
+            }
+          }
+
+          // if the element left is in the subgraph
+          if(cy.$("#n-"+left_p_i+"-"+left_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, left_p_i, left_p_j))
+            {
+              var clone_left = current_path.slice(0);
+              clone_left.push(cy.$("#n-"+left_p_i+"-"+left_p_j));
+              find_paths(clone_left);
+            }
+          }
+
+          // if the element right is in the subgraph
+          if(cy.$("#n-"+right_p_i+"-"+right_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, right_p_i, right_p_j))
+            {
+              var clone_right = current_path.slice(0);
+              clone_right.push(cy.$("#n-"+right_p_i+"-"+right_p_j));
+              find_paths(clone_right);
+            }
+          }
+
+
+
+        }
       }
 
-      // console.log("paths from current node = ");
-      // console.log(paths_for_current_node);
+
+      if(i==1&&j==1) {
+        console.log("connected to ");
+        var p = [];
+        p.push(cy.$("#n-"+i+"-"+j));
+        find_paths(p);
+
+        console.log(paths_for_current_node);
+
+
+      }
 
     
 
@@ -683,6 +771,24 @@ function process_node(i, j, radius, COLS, ROWS, dead_node)
   }
 }
 
+  function extract_i_j_from_id(id)
+  {
+    ret = [];
+    ret.push(parseInt(id.substring(2, id.lastIndexOf("-")))); // add i
+    ret.push(parseInt(id.substring(id.lastIndexOf("-") + 1))); // add j
+    return ret;
+  }
+
+  function check_if_node_exists_in_path(path, i, j)
+  {
+    // var found = false;
+    var n = 0;
+    for(n = 0; n < path.length; n++)
+    {
+      if(path[n].data("id") == "n-" + i + "-" + j) return true;
+    }
+    return false;
+  }
 
   function minimum_hop_count_between_nodes(node1, node2) {
     var ret = cy.elements().aStar({ root: node1, goal: node2 }).distance;
