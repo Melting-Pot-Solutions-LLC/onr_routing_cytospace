@@ -310,7 +310,7 @@ function display_grid(){
             { 
               // console.log("#n-"+ii+"-"+(nn-1));
               // number_of_routs = number_of_routs * calculate_routes_from_node((nn-1), ii, radius, COLS, ROWS, dead_node);
-              final_array_of_paths.push(calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node));
+              final_array_of_paths.push(calculate_routes_from_node((nn-1), ii, radius, COLS, ROWS, dead_node));
             } 
             nn--; 
    
@@ -321,7 +321,7 @@ function display_grid(){
                 { 
                   // console.log("#n-"+(mm-1)+"-"+ii);
                   // number_of_routs = number_of_routs * calculate_routes_from_node(ii, (mm-1), radius, COLS, ROWS, dead_node);
-                  final_array_of_paths.push(calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node));
+                  final_array_of_paths.push(calculate_routes_from_node(ii, (mm-1), radius, COLS, ROWS, dead_node));
                 } 
                 mm--; 
             } 
@@ -333,7 +333,7 @@ function display_grid(){
                 { 
                   // console.log("#n-"+ii+"-"+ll);
                   // number_of_routs = number_of_routs * calculate_routes_from_node(ll, ii, radius, COLS, ROWS, dead_node);
-                  final_array_of_paths.push(calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node));
+                  final_array_of_paths.push(calculate_routes_from_node(ll, ii, radius, COLS, ROWS, dead_node));
                 } 
                 ll++;     
             }         
@@ -344,6 +344,16 @@ function display_grid(){
       // }
     }
 
+    number_of_routing_tables = 1;
+    cy.nodes().forEach(function( ele ){
+      // console.log( ele.id("data") );
+      if(ele.data('id') == "n-0-0") return;
+      number_of_routing_tables *= ele.data('weight');
+      // console.log(ele.data('id'));
+       // console.log(ele.data('weight'));
+    });
+    console.log("number of routing tables for this grid - " + number_of_routing_tables);
+
 
     // console.log("Number of the possible routes - " + number_of_routs);
     var filtered = final_array_of_paths.filter(function(value, index, arr){
@@ -351,7 +361,7 @@ function display_grid(){
     return value != 1;
 
     });
-    console.log("Final array of routes  ");
+    // console.log("Final array of routes  ");
     console.log(filtered);
         
 
@@ -570,8 +580,6 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
 
        var paths_for_current_node = [];
 
-  if (ROWS == 3 && COLS == 3)
-    {
 
       // function perm(a) {
       //     if (a.length < 2) return [a];
@@ -588,7 +596,7 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
        // var array_of_paths = [];
 
       
-      console.log("for " + i + "-" + j);
+      // console.log("for " + i + "-" + j);
       // var ar = cy.nodes().toArray();
       // // console.log(perm(ar).join("\n"));
 
@@ -603,9 +611,11 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
       function find_paths(current_path)
       {
         // console.log(current_path[current_path.length-1].data("id"));
-        if(current_path[current_path.length-1].data("id") == "n-0-0") // if we found the Master - finish searching
-          //TODO need to check the length of the path
+        if(current_path[current_path.length-1].data("id") == "n-0-0"){ // if we found the Master - finish searching
+          // check the length of the path
+          if(current_path.length != radius + 1) return;
           paths_for_current_node.push(current_path);
+        }
         else {
           //get the last element of the path
           current_path[current_path.length-1].data("id")
@@ -680,20 +690,20 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
       }
 
 
-      if(i==1&&j==1) {
-        console.log("connected to ");
         var p = [];
         p.push(cy.$("#n-"+i+"-"+j));
         find_paths(p);
 
-        console.log(paths_for_current_node);
+        console.log("Paths for " + "#n-"+i+"-"+j);
+        print_paths(paths_for_current_node);
 
 
-      }
+
+      
 
     
 
-    }
+    
 
 
       // restore all the deleted elements
@@ -704,11 +714,29 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
 
   //assign the number of paths to this node
   cy.$("#n-"+i+"-"+j).json({"data":{"weight":ret}});
+  var node_id = "#n-"+i+"-"+j;
+  paths_for_current_node.unshift(node_id);
 
    return paths_for_current_node;
   // return ret;
 
 }
+
+
+function print_paths(paths)
+{
+  var i, j, final_message;
+  final_message = "";
+  for (i = 0; i < paths.length; i++)
+  {
+    final_message += "\n";
+    for (j = 0; j < paths[i].length; j++){
+      final_message += paths[i][j].data("id") + "  ->  ";
+    }
+  }
+  console.log(final_message);
+}
+
 
 function process_node(i, j, radius, COLS, ROWS, dead_node)
 {
