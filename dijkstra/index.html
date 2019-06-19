@@ -17,6 +17,8 @@
 
     <!-- for testing with local version of cytoscape.js -->
     <!-- <script src="../cytoscape.js/build/cytoscape.js"></script> -->
+    <!-- Plotly.js  to draw histograms-->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
     <link href="style.css" rel="stylesheet" />
   </head>
@@ -55,6 +57,7 @@
     <div id="cy"></div>
     <!-- Load application code at the end to ensure DOM is loaded -->
     </div>
+    <div id="histogram"></div>
 
     <script src="code.js"></script>
   </body>
@@ -63,8 +66,8 @@
 
 <script type="text/javascript">
     $(document).ready(function(){
-      var cols = 4;
-      var rows = 4;
+      var cols = 6;
+      var rows = 3;
       run_the_algorithm(cols, rows);
       
 
@@ -91,6 +94,7 @@
           
 
         }
+        
 
 
 

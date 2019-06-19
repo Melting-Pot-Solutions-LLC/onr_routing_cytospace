@@ -362,7 +362,15 @@ function display_grid(){
 
     });
     // console.log("Final array of routes  ");
-    console.log(filtered);
+    // console.log(filtered);
+    var x = [];
+    // for (var i = 0; i < COLS*ROWS; i++)
+    // {
+    //   x.push(1);
+    // }
+
+    enumerate_paths(filtered, [], 0);
+
         
 
 
@@ -492,9 +500,78 @@ function display_grid(){
     }
 
   }
+
+  function enumerate_paths(array_of_paths, current_routing_table, level)
+  {
+    if (level == array_of_paths.length) process_routing_table(current_routing_table);
+    else {
+      for (var i = 1; i < array_of_paths[level].length; i++) {
+        var current_routing_table_clone = current_routing_table.slice(0);
+        current_routing_table_clone.push(array_of_paths[level][0]); // push the node id of which the path is pushed
+        current_routing_table_clone.push(array_of_paths[level][i]); // push the path itself
+        enumerate_paths(array_of_paths, current_routing_table_clone, level+1);
+      }
+    }
+
+  }
+
+  function process_routing_table(current_routing_table)
+  {
+    // console.log("New routing table");
+    // console.log(current_routing_table);
+
+    // extract the last node
+    // 
+    var right=0;
+    var bot=0;
+    var left=0;
+    var top=0;
+    for (var i = 0; i < current_routing_table.length; i++)
+    {
+      if (i%2==0) continue; // skip the node IDs
+      else
+      {
+        // extrac the last one
+        // console.log("the last element is "+current_routing_table[i][current_routing_table[i].length-2].data("id"));
+        var id = current_routing_table[i][current_routing_table[i].length-2].data("id");
+        if(id == "n-1-0") right++;
+        else if (id == "n-0-1") bot++;
+        else if (id == "n-0-" + (ROWS-1)) top++;
+        else if (id == "n-"+(COLS-1)+"-0") left++;
+        else console.log("ERROR!!!");
+
+      }
+    }
+
+    // console.log("for this table the maximum load is " + Math.max(right, bot, top, left));
+    // x[Math.max(right, bot, top, left)]++;
+    x.push(Math.max(right, bot, top, left));
+
+    // console.log("\n");
+  }
+
+
   console.log("\n");
   console.log("FINISHED PROCESSING THE NODES");
   console.log("\n");
+
+    console.log("\nNOW PLOTTING A HISTOGRAM");
+
+
+      console.log(x);
+        var trace = {
+            x: x,
+            type: 'histogram',
+          };
+        var data1 = [trace];
+        Plotly.newPlot('histogram', data1, {}, {showSendToCloud: true});
+
+        var min = COLS*ROWS;
+        for(var i=0;i<x.length;i++)
+        {
+          if(x[i]>min) min = x[i];
+        }
+        console.log("the min is " + min);
     
 
 
@@ -694,7 +771,7 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
         p.push(cy.$("#n-"+i+"-"+j));
         find_paths(p);
 
-        console.log("Paths for " + "#n-"+i+"-"+j);
+        // console.log("Paths for " + "#n-"+i+"-"+j);
         print_paths(paths_for_current_node);
 
 
@@ -734,7 +811,7 @@ function print_paths(paths)
       final_message += paths[i][j].data("id") + "  ->  ";
     }
   }
-  console.log(final_message);
+  // console.log(final_message);
 }
 
 
@@ -827,4 +904,5 @@ function process_node(i, j, radius, COLS, ROWS, dead_node)
       var ret = cy.elements().aStar({ root: node1, goal: node2 }).found;
     return ret;
     }
+
 
