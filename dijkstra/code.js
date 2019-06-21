@@ -364,12 +364,16 @@ function display_grid(){
     // console.log("Final array of routes  ");
     // console.log(filtered);
     var x = [];
+    var number_of_random_routs = 0;
     // for (var i = 0; i < COLS*ROWS; i++)
     // {
     //   x.push(1);
     // }
 
-    enumerate_paths(filtered, [], 0);
+    for (var j = 0; j < 1000000; j++)
+    {
+      enumerate_random_paths(filtered, [], 0);
+    }
 
         
 
@@ -501,6 +505,23 @@ function display_grid(){
 
   }
 
+
+  function enumerate_random_paths(array_of_paths, current_routing_table, level)
+  {
+    if (level == array_of_paths.length) process_routing_table(current_routing_table);
+    else {
+
+      var i = Math.floor((Math.random()*(array_of_paths[level].length-1))+1);
+      // for (var i = 1; i < array_of_paths[level].length; i++) {
+        var current_routing_table_clone = current_routing_table.slice(0);
+        current_routing_table_clone.push(array_of_paths[level][0]); // push the node id of which the path is pushed
+        current_routing_table_clone.push(array_of_paths[level][i]); // push the path itself
+        enumerate_random_paths(array_of_paths, current_routing_table_clone, level+1);
+      // }
+    }
+  }
+
+
   function enumerate_paths(array_of_paths, current_routing_table, level)
   {
     if (level == array_of_paths.length) process_routing_table(current_routing_table);
@@ -512,7 +533,6 @@ function display_grid(){
         enumerate_paths(array_of_paths, current_routing_table_clone, level+1);
       }
     }
-
   }
 
   function process_routing_table(current_routing_table)
@@ -533,11 +553,12 @@ function display_grid(){
       {
         // extrac the last one
         // console.log("the last element is "+current_routing_table[i][current_routing_table[i].length-2].data("id"));
-        var id = current_routing_table[i][current_routing_table[i].length-2].data("id");
-        if(id == "n-1-0") right++;
-        else if (id == "n-0-1") bot++;
-        else if (id == "n-0-" + (ROWS-1)) top++;
-        else if (id == "n-"+(COLS-1)+"-0") left++;
+        // var id = current_routing_table[i][current_routing_table[i].length-2].data("id");
+        var id = current_routing_table[i][current_routing_table[i].length-2];
+        if(id == "#n-1-0") right++;
+        else if (id == "#n-0-1") bot++;
+        else if (id == "#n-0-" + (ROWS-1)) top++;
+        else if (id == "#n-"+(COLS-1)+"-0") left++;
         else console.log("ERROR!!!");
 
       }
@@ -546,6 +567,7 @@ function display_grid(){
     // console.log("for this table the maximum load is " + Math.max(right, bot, top, left));
     // x[Math.max(right, bot, top, left)]++;
     x.push(Math.max(right, bot, top, left));
+    number_of_random_routs++;
 
     // console.log("\n");
   }
@@ -569,7 +591,7 @@ function display_grid(){
         var min = COLS*ROWS;
         for(var i=0;i<x.length;i++)
         {
-          if(x[i]>min) min = x[i];
+          if(x[i]<min) min = x[i];
         }
         console.log("the min is " + min);
     
@@ -688,18 +710,20 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
       function find_paths(current_path)
       {
         // console.log(current_path[current_path.length-1].data("id"));
-        if(current_path[current_path.length-1].data("id") == "n-0-0"){ // if we found the Master - finish searching
+        // if(current_path[current_path.length-1].data("id") == "n-0-0"){ // if we found the Master - finish searching
+          if(current_path[current_path.length-1] == "#n-0-0"){
           // check the length of the path
           if(current_path.length != radius + 1) return;
           paths_for_current_node.push(current_path);
         }
         else {
           //get the last element of the path
-          current_path[current_path.length-1].data("id")
+          // current_path[current_path.length-1].data("id")
 
           var top_p_i, top_p_j, bot_p_i, bot_p_j, left_p_i, left_p_j, right_p_i, right_p_j;
           // console.log(current_path[current_path.length-1].data("id"));
-          var current_i_j = extract_i_j_from_id(current_path[current_path.length-1].data("id"));
+          // var current_i_j = extract_i_j_from_id(current_path[current_path.length-1].data("id"));
+          var current_i_j = extract_i_j_from_id(current_path[current_path.length-1]);
 
           // node above
           if (current_i_j[1] == 0) top_p_j = ROWS - 1;
@@ -726,7 +750,8 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
             if(!check_if_node_exists_in_path(current_path, top_p_i, top_p_j)) // if that element was not visited before
             {
               var clone_top = current_path.slice(0);
-              clone_top.push(cy.$("#n-"+top_p_i+"-"+top_p_j));
+              // clone_top.push(cy.$("#n-"+top_p_i+"-"+top_p_j));
+              clone_top.push("#n-"+top_p_i+"-"+top_p_j);
               find_paths(clone_top);
             }
           }
@@ -736,7 +761,8 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
             if(!check_if_node_exists_in_path(current_path, bot_p_i, bot_p_j)) // if that element was not visited before
             {
               var clone_bot = current_path.slice(0);
-              clone_bot.push(cy.$("#n-"+bot_p_i+"-"+bot_p_j));
+              // clone_bot.push(cy.$("#n-"+bot_p_i+"-"+bot_p_j));
+              clone_bot.push("#n-"+bot_p_i+"-"+bot_p_j);
               find_paths(clone_bot);
             }
           }
@@ -746,7 +772,8 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
             if(!check_if_node_exists_in_path(current_path, left_p_i, left_p_j))
             {
               var clone_left = current_path.slice(0);
-              clone_left.push(cy.$("#n-"+left_p_i+"-"+left_p_j));
+              // clone_left.push(cy.$("#n-"+left_p_i+"-"+left_p_j));
+              clone_left.push("#n-"+left_p_i+"-"+left_p_j);
               find_paths(clone_left);
             }
           }
@@ -756,7 +783,8 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
             if(!check_if_node_exists_in_path(current_path, right_p_i, right_p_j))
             {
               var clone_right = current_path.slice(0);
-              clone_right.push(cy.$("#n-"+right_p_i+"-"+right_p_j));
+              // clone_right.push(cy.$("#n-"+right_p_i+"-"+right_p_j));
+              clone_right.push("#n-"+right_p_i+"-"+right_p_j);
               find_paths(clone_right);
             }
           }
@@ -768,7 +796,8 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
 
 
         var p = [];
-        p.push(cy.$("#n-"+i+"-"+j));
+        // p.push(cy.$("#n-"+i+"-"+j));
+        p.push("#n-"+i+"-"+j);
         find_paths(p);
 
         // console.log("Paths for " + "#n-"+i+"-"+j);
@@ -808,7 +837,8 @@ function print_paths(paths)
   {
     final_message += "\n";
     for (j = 0; j < paths[i].length; j++){
-      final_message += paths[i][j].data("id") + "  ->  ";
+      // final_message += paths[i][j].data("id") + "  ->  ";
+      final_message += paths[i][j] + "  ->  ";
     }
   }
   // console.log(final_message);
@@ -879,7 +909,7 @@ function process_node(i, j, radius, COLS, ROWS, dead_node)
   function extract_i_j_from_id(id)
   {
     ret = [];
-    ret.push(parseInt(id.substring(2, id.lastIndexOf("-")))); // add i
+    ret.push(parseInt(id.substring(3, id.lastIndexOf("-")))); // add i
     ret.push(parseInt(id.substring(id.lastIndexOf("-") + 1))); // add j
     return ret;
   }
@@ -890,7 +920,8 @@ function process_node(i, j, radius, COLS, ROWS, dead_node)
     var n = 0;
     for(n = 0; n < path.length; n++)
     {
-      if(path[n].data("id") == "n-" + i + "-" + j) return true;
+      // if(path[n].data("id") == "n-" + i + "-" + j) return true;
+      if(path[n] == "#n-" + i + "-" + j) return true;
     }
     return false;
   }
@@ -905,4 +936,38 @@ function process_node(i, j, radius, COLS, ROWS, dead_node)
     return ret;
     }
 
+
+function roughSizeOfObject( object ) {
+
+    var objectList = [];
+    var stack = [ object ];
+    var bytes = 0;
+
+    while ( stack.length ) {
+        var value = stack.pop();
+
+        if ( typeof value === 'boolean' ) {
+            bytes += 4;
+        }
+        else if ( typeof value === 'string' ) {
+            bytes += value.length * 2;
+        }
+        else if ( typeof value === 'number' ) {
+            bytes += 8;
+        }
+        else if
+        (
+            typeof value === 'object'
+            && objectList.indexOf( value ) === -1
+        )
+        {
+            objectList.push( value );
+
+            for( var i in value ) {
+                stack.push( value[ i ] );
+            }
+        }
+    }
+    return bytes;
+}
 
