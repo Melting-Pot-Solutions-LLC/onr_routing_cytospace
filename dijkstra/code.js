@@ -276,7 +276,8 @@ function display_grid(){
     cy.$("#n-"+0+"-"+(ROWS-1)).json({"data":{"weight":1}});
 
     var number_of_routs = 1;
-    var final_array_of_paths = []
+    var final_array_of_paths = [];
+    console.log("starting calculating routes from all nodes");
     for(radius = 1 ; radius <= COLS + ROWS; radius++) {
       // for (j = 0; j < ROWS; j++) {
       //   for (i = 0; i < COLS; i++) {
@@ -294,6 +295,7 @@ function display_grid(){
         mm = ROWS;
         nn = COLS;
         // CLOCK WISE
+
         while (kk < mm && ll < nn)
         {
             // Print the first row from the remaining rows 
@@ -301,7 +303,7 @@ function display_grid(){
             { 
               // console.log("#n-"+kk+"-"+ii);
               // number_of_routs = number_of_routs * calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node);
-              final_array_of_paths.push(calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node));
+              final_array_of_paths.push(calculate_routes_from_node(ii, kk, radius, COLS, ROWS, dead_node, final_array_of_paths));
             } 
             kk++; 
    
@@ -310,7 +312,7 @@ function display_grid(){
             { 
               // console.log("#n-"+ii+"-"+(nn-1));
               // number_of_routs = number_of_routs * calculate_routes_from_node((nn-1), ii, radius, COLS, ROWS, dead_node);
-              final_array_of_paths.push(calculate_routes_from_node((nn-1), ii, radius, COLS, ROWS, dead_node));
+              final_array_of_paths.push(calculate_routes_from_node((nn-1), ii, radius, COLS, ROWS, dead_node, final_array_of_paths));
             } 
             nn--; 
    
@@ -321,7 +323,7 @@ function display_grid(){
                 { 
                   // console.log("#n-"+(mm-1)+"-"+ii);
                   // number_of_routs = number_of_routs * calculate_routes_from_node(ii, (mm-1), radius, COLS, ROWS, dead_node);
-                  final_array_of_paths.push(calculate_routes_from_node(ii, (mm-1), radius, COLS, ROWS, dead_node));
+                  final_array_of_paths.push(calculate_routes_from_node(ii, (mm-1), radius, COLS, ROWS, dead_node, final_array_of_paths));
                 } 
                 mm--; 
             } 
@@ -333,7 +335,7 @@ function display_grid(){
                 { 
                   // console.log("#n-"+ii+"-"+ll);
                   // number_of_routs = number_of_routs * calculate_routes_from_node(ll, ii, radius, COLS, ROWS, dead_node);
-                  final_array_of_paths.push(calculate_routes_from_node(ll, ii, radius, COLS, ROWS, dead_node));
+                  final_array_of_paths.push(calculate_routes_from_node(ll, ii, radius, COLS, ROWS, dead_node, final_array_of_paths));
                 } 
                 ll++;     
             }         
@@ -361,8 +363,8 @@ function display_grid(){
     return value != 1;
 
     });
-    // console.log("Final array of routes  ");
-    // console.log(filtered);
+     console.log("Final array of routes  ");
+     console.log(filtered);
     var x = [];
     var number_of_random_routs = 0;
     // for (var i = 0; i < COLS*ROWS; i++)
@@ -600,7 +602,7 @@ function display_grid(){
 }
 }
 
-function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
+function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node, final_array_of_paths)
 {
   var ret = 0;
   var origin = "#n-0-0";
@@ -707,6 +709,212 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
       // }
 
       var global_paths
+
+
+      function find_paths_dynamic_programming(current_path, final_array_of_paths)
+      {
+
+        if(current_path[current_path.length-1] == "#n-0-0"){
+          // check the length of the path
+          if(current_path.length != radius + 1) return;
+          paths_for_current_node.push(current_path);
+        }
+        else  if(radius < 2){
+          var top_p_i, top_p_j, bot_p_i, bot_p_j, left_p_i, left_p_j, right_p_i, right_p_j;
+          // console.log(current_path[current_path.length-1].data("id"));
+          // var current_i_j = extract_i_j_from_id(current_path[current_path.length-1].data("id"));
+          var current_i_j = extract_i_j_from_id(current_path[current_path.length-1]);
+
+          // node above
+          if (current_i_j[1] == 0) top_p_j = ROWS - 1;
+          else top_p_j = current_i_j[1]-1;
+          top_p_i = current_i_j[0];
+
+          // left node
+          if (current_i_j[0] == 0) left_p_i = COLS - 1;
+          else left_p_i = current_i_j[0]-1;
+          left_p_j = current_i_j[1];
+
+          // right node
+          if (current_i_j[0] == COLS-1) right_p_i = 0;
+          else right_p_i = current_i_j[0]+1;
+          right_p_j = current_i_j[1];
+
+          // node below
+          if (current_i_j[1] == ROWS - 1) bot_p_j = 0;
+          else bot_p_j = current_i_j[1]+1;
+          bot_p_i = current_i_j[0];
+
+          // if the element above is in the subgraph
+          if(cy.$("#n-"+top_p_i+"-"+top_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, top_p_i, top_p_j)) // if that element was not visited before
+            {
+              var clone_top = current_path.slice(0);
+              // clone_top.push(cy.$("#n-"+top_p_i+"-"+top_p_j));
+              clone_top.push("#n-"+top_p_i+"-"+top_p_j);
+              find_paths(clone_top, final_array_of_paths);
+            }
+          }
+
+          // if the element below is in the subgraph
+          if(cy.$("#n-"+bot_p_i+"-"+bot_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, bot_p_i, bot_p_j)) // if that element was not visited before
+            {
+              var clone_bot = current_path.slice(0);
+              // clone_bot.push(cy.$("#n-"+bot_p_i+"-"+bot_p_j));
+              clone_bot.push("#n-"+bot_p_i+"-"+bot_p_j);
+              find_paths(clone_bot, final_array_of_paths);
+            }
+          }
+
+          // if the element left is in the subgraph
+          if(cy.$("#n-"+left_p_i+"-"+left_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, left_p_i, left_p_j))
+            {
+              var clone_left = current_path.slice(0);
+              // clone_left.push(cy.$("#n-"+left_p_i+"-"+left_p_j));
+              clone_left.push("#n-"+left_p_i+"-"+left_p_j);
+              find_paths(clone_left, final_array_of_paths);
+            }
+          }
+
+          // if the element right is in the subgraph
+          if(cy.$("#n-"+right_p_i+"-"+right_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, right_p_i, right_p_j))
+            {
+              var clone_right = current_path.slice(0);
+              // clone_right.push(cy.$("#n-"+right_p_i+"-"+right_p_j));
+              clone_right.push("#n-"+right_p_i+"-"+right_p_j);
+              find_paths(clone_right, final_array_of_paths);
+            }
+          }
+      }
+      else // if the node is far away from the master - use dynamic programming
+      {
+        var top_p_i, top_p_j, bot_p_i, bot_p_j, left_p_i, left_p_j, right_p_i, right_p_j;
+          // console.log(current_path[current_path.length-1].data("id"));
+          // var current_i_j = extract_i_j_from_id(current_path[current_path.length-1].data("id"));
+          var current_i_j = extract_i_j_from_id(current_path[current_path.length-1]);
+
+          // node above
+          if (current_i_j[1] == 0) top_p_j = ROWS - 1;
+          else top_p_j = current_i_j[1]-1;
+          top_p_i = current_i_j[0];
+
+          // left node
+          if (current_i_j[0] == 0) left_p_i = COLS - 1;
+          else left_p_i = current_i_j[0]-1;
+          left_p_j = current_i_j[1];
+
+          // right node
+          if (current_i_j[0] == COLS-1) right_p_i = 0;
+          else right_p_i = current_i_j[0]+1;
+          right_p_j = current_i_j[1];
+
+          // node below
+          if (current_i_j[1] == ROWS - 1) bot_p_j = 0;
+          else bot_p_j = current_i_j[1]+1;
+          bot_p_i = current_i_j[0];
+
+          // if the element above is in the subgraph
+          if(cy.$("#n-"+top_p_i+"-"+top_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, top_p_i, top_p_j)) // if that element was not visited before
+            {
+              // var clone_top = current_path.slice(0);
+              // clone_top.push(cy.$("#n-"+top_p_i+"-"+top_p_j));
+              // clone_top.push("#n-"+top_p_i+"-"+top_p_j);
+              // clone all the paths from top_p_i-top_p_j to the paths of the current node
+              for(var k = 0; k < final_array_of_paths.length; k++) // find that element in the final array, copy all paths
+              {
+                if(Array.isArray(final_array_of_paths[k]) && (final_array_of_paths[k][0] == "#n-"+top_p_i+"-"+top_p_j)){
+                  for(var l = 1; l < final_array_of_paths[k].length; l++)
+                  {
+                     var clone_top = final_array_of_paths[k][l].slice(0);
+                     clone_top.unshift("#n-"+current_i_j[0]+"-"+current_i_j[1]);
+                     paths_for_current_node.push(clone_top);
+                    // paths_for_current_node.push(final_array_of_paths[k][l]);
+                  }
+                  break;
+                }
+              }
+              // paths_for_current_node.push(current_path);
+            }
+          }
+
+          // if the element below is in the subgraph
+          if(cy.$("#n-"+bot_p_i+"-"+bot_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, bot_p_i, bot_p_j)) // if that element was not visited before
+            {
+              // var clone_bot = current_path.slice(0);
+              // clone_bot.push(cy.$("#n-"+bot_p_i+"-"+bot_p_j));
+              // clone_bot.push("#n-"+bot_p_i+"-"+bot_p_j);
+              for(var k = 0; k < final_array_of_paths.length; k++) // find that element in the final array, copy all paths
+              {
+                if(Array.isArray(final_array_of_paths[k]) && (final_array_of_paths[k][0] == "#n-"+bot_p_i+"-"+bot_p_j)){
+                  for(var l = 1; l < final_array_of_paths[k].length; l++)
+                  {
+                    var clone_bot = final_array_of_paths[k][l].slice(0);
+                    clone_bot.unshift("#n-"+current_i_j[0]+"-"+current_i_j[1]);
+                    paths_for_current_node.push(clone_bot);
+                  }
+                  break;
+                }
+              }
+              // paths_for_current_node.push(current_path);
+            }
+          }
+
+          // if the element left is in the subgraph
+          if(cy.$("#n-"+left_p_i+"-"+left_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, left_p_i, left_p_j))
+            {
+              // var clone_left = current_path.slice(0);
+              // clone_left.push(cy.$("#n-"+left_p_i+"-"+left_p_j));
+              // clone_left.push("#n-"+left_p_i+"-"+left_p_j);
+              for(var k = 0; k < final_array_of_paths.length; k++) // find that element in the final array, copy all paths
+              {
+                if(Array.isArray(final_array_of_paths[k]) && (final_array_of_paths[k][0] == "#n-"+left_p_i+"-"+left_p_j)){
+                  for(var l = 1; l < final_array_of_paths[k].length; l++)
+                  {
+                    var clone_left = final_array_of_paths[k][l].slice(0);
+                    clone_left.unshift("#n-"+current_i_j[0]+"-"+current_i_j[1]);
+                    paths_for_current_node.push(clone_left);
+                    // paths_for_current_node.push(final_array_of_paths[k][l]);
+                  }
+                  break;
+                }
+              }
+              // paths_for_current_node.push(current_path);
+            }
+          }
+
+          // if the element right is in the subgraph
+          if(cy.$("#n-"+right_p_i+"-"+right_p_j).inside()) {
+            if(!check_if_node_exists_in_path(current_path, right_p_i, right_p_j))
+            {
+              // var clone_right = current_path.slice(0);
+              // clone_right.push(cy.$("#n-"+right_p_i+"-"+right_p_j));
+              // clone_right.push("#n-"+right_p_i+"-"+right_p_j);
+              for(var k = 0; k < final_array_of_paths.length; k++) // find that element in the final array, copy all paths
+              {
+                if(Array.isArray(final_array_of_paths[k]) && (final_array_of_paths[k][0] == "#n-"+right_p_i+"-"+right_p_j)){
+                  for(var l = 1; l < final_array_of_paths[k].length; l++)
+                  {
+                    var clone_right = final_array_of_paths[k][l].slice(0);
+                    clone_right.unshift("#n-"+current_i_j[0]+"-"+current_i_j[1]);
+                    paths_for_current_node.push(clone_right);
+                    // paths_for_current_node.push(final_array_of_paths[k][l]);
+                  }
+                  break;
+                }
+              }
+              // paths_for_current_node.push(current_path);
+            }
+          }
+      }
+    }
+
+
       function find_paths(current_path)
       {
         // console.log(current_path[current_path.length-1].data("id"));
@@ -797,11 +1005,13 @@ function calculate_routes_from_node(i, j, radius, COLS, ROWS, dead_node)
 
         var p = [];
         // p.push(cy.$("#n-"+i+"-"+j));
+        console.log("Calculating paths for " + "#n-"+i+"-"+j + "...");
         p.push("#n-"+i+"-"+j);
-        find_paths(p);
+        // find_paths(p);
+        find_paths_dynamic_programming(p, final_array_of_paths);
 
-        // console.log("Paths for " + "#n-"+i+"-"+j);
-        print_paths(paths_for_current_node);
+        
+        // print_paths(paths_for_current_node);
 
 
 
@@ -970,4 +1180,6 @@ function roughSizeOfObject( object ) {
     }
     return bytes;
 }
+
+
 
