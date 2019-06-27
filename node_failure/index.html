@@ -58,6 +58,8 @@
     <!-- Load application code at the end to ensure DOM is loaded -->
     </div>
     <div id="histogram"></div>
+    <div id="histogram_average_load_seen_by_packet"></div>
+    <div id="histogram_average_load_seen_by_packet_standard_deviation"></div>
 
     <script src="code.js"></script>
   </body>
@@ -66,9 +68,10 @@
 
 <script type="text/javascript">
     $(document).ready(function(){
-      var cols = 50;
-      var rows = 2;
-      run_the_algorithm(cols, rows, "#n-1-0");
+      var cols = 5;
+      var rows = 5;
+      // run_the_algorithm(cols, rows, "#n-1-0");
+      run_the_algorithm(cols, rows);
       
 
 
@@ -94,11 +97,6 @@
           
 
         }
-        
-
-
-
-
 
     })
 </script>

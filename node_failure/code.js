@@ -375,10 +375,10 @@ function display_grid(){
     //   x.push(1);
     // }
 
-    for (var j = 0; j < 1000000; j++)
-    {
+    // for (var j = 0; j < 1000000; j++)
+    // {
       enumerate_random_paths(filtered, [], 0);
-    }
+    // }
 
         
 
@@ -513,7 +513,7 @@ function display_grid(){
 
   function enumerate_random_paths(array_of_paths, current_routing_table, level)
   {
-    if (level == array_of_paths.length) process_routing_table(current_routing_table);
+    if (level == array_of_paths.length) fully_process_routing_table(current_routing_table);
     else {
 
       var i = Math.floor((Math.random()*(array_of_paths[level].length-1))+1);
@@ -547,6 +547,8 @@ function display_grid(){
 
     // extract the last node
     // 
+    console.log("processing a routing table:");
+    console.log(current_routing_table);
     var right=0;
     var bot=0;
     var left=0;
@@ -578,6 +580,71 @@ function display_grid(){
   }
 
 
+  function fully_process_routing_table(current_routing_table)
+  {
+    // console.log("New routing table");
+    // console.log(current_routing_table);
+
+    // extract the last node
+    // 
+    console.log("FULLY processing a routing table:");
+    console.log(current_routing_table);
+
+    console.log("Resetting the links loads...");
+    cy.edges().forEach(function( ele ){
+      // console.log( ele.id("data") );
+      ele.json({"data":{"weight":0}});
+      // console.log(ele.data('id'));
+       // console.log(ele.data('weight'));
+    });
+
+
+    var right=0;
+    var bot=0;
+    var left=0;
+    var top=0;
+    for (var i = 0; i < current_routing_table.length; i++)
+    {
+      if (i%2==0) continue; // skip the node IDs
+      else
+      {
+
+        for (var j = 1; j < current_routing_table[i].length; j++)
+        {
+          var current_node_id = current_routing_table[i][j];
+          var prev_node_id = current_routing_table[i][j-1];
+          var edge_id_1 = "#e-" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1]+ "--" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1];
+          var edge_id_2 = "#e-" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1]+ "--" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1];
+          if (cy.$(edge_id_1).inside() || cy.$(edge_id_2).inside()) console.log("INSIDE"); else console.log("ERROR finding edge");
+          
+           // var current_weight = cy.$("#"+).data().weight;
+           // current_weight++;
+           // cy.$("#"+aStar2.path[k].id()).json({"data":{"weight":current_weight}});
+        }
+        // extrac the last one
+        // console.log("the last element is "+current_routing_table[i][current_routing_table[i].length-2].data("id"));
+        // var id = current_routing_table[i][current_routing_table[i].length-2].data("id");
+        // var id = current_routing_table[i][current_routing_table[i].length-2];
+        // if(id == "#n-1-0") right++;
+        // else if (id == "#n-0-1") bot++;
+        // else if (id == "#n-0-" + (ROWS-1)) top++;
+        // else if (id == "#n-"+(COLS-1)+"-0") left++;
+        // else console.log("ERROR!!!");
+
+
+
+      }
+    }
+
+    // console.log("for this table the maximum load is " + Math.max(right, bot, top, left));
+    // x[Math.max(right, bot, top, left)]++;
+    x.push(Math.max(right, bot, top, left));
+    number_of_random_routs++;
+
+    // console.log("\n");
+  }
+
+
   console.log("\n");
   console.log("FINISHED PROCESSING THE NODES");
   console.log("\n");
@@ -591,7 +658,16 @@ function display_grid(){
             type: 'histogram',
           };
         var data1 = [trace];
-        Plotly.newPlot('histogram', data1, {}, {showSendToCloud: true});
+
+
+        var layout = {title: {text:'Worst Link Load'}};
+        var layout_average_load_seen_by_packet = {title: {text:'Average Load Seen by a Packet'}};
+        var layout_average_load_seen_by_packet_standard_deviation = {title: {text:'Average Load Seen by a Packet (SD)'}};
+
+
+        Plotly.newPlot('histogram', data1, layout, {showSendToCloud: true});
+        Plotly.newPlot('histogram_average_load_seen_by_packet', data1, layout_average_load_seen_by_packet, {showSendToCloud: true});
+        Plotly.newPlot('histogram_average_load_seen_by_packet_standard_deviation', data1, layout_average_load_seen_by_packet_standard_deviation, {showSendToCloud: true});
 
         var min = COLS*ROWS;
         for(var i=0;i<x.length;i++)
