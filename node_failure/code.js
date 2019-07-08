@@ -15,6 +15,8 @@ function run_the_algorithm(COLS, ROWS, dead_node=""){
 
     
 var data = [];
+var data_average_load_seen_by_packet = []
+var data_average_load_seen_by_packet_standard_deviation = []
 
 function node() 
     {
@@ -353,7 +355,7 @@ function display_grid(){
       // console.log( ele.id("data") );
       if((ele.data('id') == "n-0-0") || (ele.data('id') == "#"+dead_node)) return;
       number_of_routing_tables *= ele.data('weight');
-      console.log("weight for " + ele.data('id') + " is - " + ele.data('weight'));
+      // console.log("weight for " + ele.data('id') + " is - " + ele.data('weight'));
       // console.log(ele.data('id'));
        // console.log(ele.data('weight'));
     });
@@ -375,10 +377,10 @@ function display_grid(){
     //   x.push(1);
     // }
 
-    // for (var j = 0; j < 1000000; j++)
-    // {
+    for (var j = 0; j < 10000; j++)
+    {
       enumerate_random_paths(filtered, [], 0);
-    // }
+    }
 
         
 
@@ -587,10 +589,10 @@ function display_grid(){
 
     // extract the last node
     // 
-    console.log("FULLY processing a routing table:");
-    console.log(current_routing_table);
+    // console.log("FULLY processing a routing table:");
+    // console.log(current_routing_table);
 
-    console.log("Resetting the links loads...");
+    // console.log("Resetting the links loads...");
     cy.edges().forEach(function( ele ){
       // console.log( ele.id("data") );
       ele.json({"data":{"weight":0}});
@@ -603,6 +605,8 @@ function display_grid(){
     var bot=0;
     var left=0;
     var top=0;
+
+    // STEP 1: process the routing table for the first time, update the edges weights according to how many messages will go along each link
     for (var i = 0; i < current_routing_table.length; i++)
     {
       if (i%2==0) continue; // skip the node IDs
@@ -615,33 +619,85 @@ function display_grid(){
           var prev_node_id = current_routing_table[i][j-1];
           var edge_id_1 = "#e-" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1]+ "--" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1];
           var edge_id_2 = "#e-" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1]+ "--" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1];
-          if (cy.$(edge_id_1).inside() || cy.$(edge_id_2).inside()) console.log("INSIDE"); else console.log("ERROR finding edge");
-          
-           // var current_weight = cy.$("#"+).data().weight;
-           // current_weight++;
-           // cy.$("#"+aStar2.path[k].id()).json({"data":{"weight":current_weight}});
+          if (cy.$(edge_id_1).inside())
+          {
+            var current_weight = cy.$(edge_id_1).data().weight;
+            current_weight++;
+            cy.$(edge_id_1).json({"data":{"weight":current_weight}});
+            cy.$(edge_id_1).json({"data":{"label":current_weight}});
+          } 
+          else if (cy.$(edge_id_2).inside())
+          {
+            var current_weight = cy.$(edge_id_2).data().weight;
+            current_weight++;
+            cy.$(edge_id_2).json({"data":{"weight":current_weight}});
+            cy.$(edge_id_2).json({"data":{"label":current_weight}});
+          }
+          else console.log("ERROR finding edge");
         }
-        // extrac the last one
-        // console.log("the last element is "+current_routing_table[i][current_routing_table[i].length-2].data("id"));
-        // var id = current_routing_table[i][current_routing_table[i].length-2].data("id");
-        // var id = current_routing_table[i][current_routing_table[i].length-2];
-        // if(id == "#n-1-0") right++;
-        // else if (id == "#n-0-1") bot++;
-        // else if (id == "#n-0-" + (ROWS-1)) top++;
-        // else if (id == "#n-"+(COLS-1)+"-0") left++;
-        // else console.log("ERROR!!!");
-
-
-
       }
     }
 
-    // console.log("for this table the maximum load is " + Math.max(right, bot, top, left));
-    // x[Math.max(right, bot, top, left)]++;
+
+
+    // STEP 2: process the routing table second time to calculate the average load seen by a message
+
+    for (var i = 0; i < current_routing_table.length; i++)
+    {
+      if (i%2==0) continue; // skip the node IDs
+      else
+      {
+        var average_load_seen_by_packet = 0;
+
+        for (var j = 1; j < current_routing_table[i].length; j++)
+        {
+          var current_node_id = current_routing_table[i][j];
+          var prev_node_id = current_routing_table[i][j-1];
+          var edge_id_1 = "#e-" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1]+ "--" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1];
+          var edge_id_2 = "#e-" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1]+ "--" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1];
+
+          if (cy.$(edge_id_1).inside())
+          {
+            average_load_seen_by_packet += cy.$(edge_id_1).data().weight
+          } 
+          else if (cy.$(edge_id_2).inside())
+          {
+            average_load_seen_by_packet += cy.$(edge_id_2).data().weight
+          }
+          else console.log("ERROR finding edge");
+        }
+        average_load_seen_by_packet = average_load_seen_by_packet / (current_routing_table[i].length-1);
+        // console.log("For " + current_routing_table[i-1] + " average_load_seen_by_packet is " + average_load_seen_by_packet);
+        data_average_load_seen_by_packet.push(Math.round(average_load_seen_by_packet));
+      }
+    }
+
+    // find SD for the current routing table
+    // find the mean
+    var mean_average_load_seen_by_packet = 0;
+    for (var i = 0; i < current_routing_table.length/2; i++)
+    {
+      mean_average_load_seen_by_packet += data_average_load_seen_by_packet[data_average_load_seen_by_packet.length-i-1];
+    }
+    mean_average_load_seen_by_packet /= (current_routing_table.length/2);
+    mean_average_load_seen_by_packet = Math.round(mean_average_load_seen_by_packet);
+
+    var sd_average_load_seen_by_packet = 0;
+    for (var i = 0; i < current_routing_table.length/2; i++)
+    {
+      sd_average_load_seen_by_packet += Math.pow(mean_average_load_seen_by_packet - data_average_load_seen_by_packet[data_average_load_seen_by_packet.length-i-1], 2);
+    }
+
+    sd_average_load_seen_by_packet /= (current_routing_table.length/2);
+    sd_average_load_seen_by_packet = Math.round(Math.sqrt(sd_average_load_seen_by_packet));
+
+    data_average_load_seen_by_packet_standard_deviation.push(sd_average_load_seen_by_packet);
+
+
     x.push(Math.max(right, bot, top, left));
     number_of_random_routs++;
 
-    // console.log("\n");
+
   }
 
 
@@ -652,12 +708,25 @@ function display_grid(){
     console.log("\nNOW PLOTTING A HISTOGRAM");
 
 
-      console.log(x);
+      console.log(data_average_load_seen_by_packet_standard_deviation);
         var trace = {
             x: x,
             type: 'histogram',
           };
         var data1 = [trace];
+
+        var trace_average_load_seen_by_packet = {
+            x: data_average_load_seen_by_packet,
+            type: 'histogram',
+          };
+        var data2 = [trace_average_load_seen_by_packet];
+
+        
+        var trace_average_load_seen_by_packet_standard_deviation = {
+            x: data_average_load_seen_by_packet_standard_deviation,
+            type: 'histogram',
+          };
+        var data3 = [trace_average_load_seen_by_packet_standard_deviation];
 
 
         var layout = {title: {text:'Worst Link Load'}};
@@ -665,23 +734,24 @@ function display_grid(){
         var layout_average_load_seen_by_packet_standard_deviation = {title: {text:'Average Load Seen by a Packet (SD)'}};
 
 
-        Plotly.newPlot('histogram', data1, layout, {showSendToCloud: true});
-        Plotly.newPlot('histogram_average_load_seen_by_packet', data1, layout_average_load_seen_by_packet, {showSendToCloud: true});
-        Plotly.newPlot('histogram_average_load_seen_by_packet_standard_deviation', data1, layout_average_load_seen_by_packet_standard_deviation, {showSendToCloud: true});
+        //Plotly.newPlot('histogram', data1, layout, {showSendToCloud: true});
+        //console.log(data_average_load_seen_by_packet);
+        Plotly.newPlot('histogram_average_load_seen_by_packet', data2, layout_average_load_seen_by_packet, {showSendToCloud: true});
+        Plotly.newPlot('histogram_average_load_seen_by_packet_standard_deviation', data3, layout_average_load_seen_by_packet_standard_deviation, {showSendToCloud: true});
 
-        var min = COLS*ROWS;
-        for(var i=0;i<x.length;i++)
-        {
-          if(x[i]<min) min = x[i];
-        }
-        console.log("the min load is " + min);
+        // var min = COLS*ROWS;
+        // for(var i=0;i<x.length;i++)
+        // {
+        //   if(x[i]<min) min = x[i];
+        // }
+        // // console.log("the min load is " + min);
 
-        var max = COLS*ROWS;
-        for(var i=0;i<x.length;i++)
-        {
-          if(x[i]>max) max = x[i];
-        }
-        console.log("the max load is " + max);
+        // var max = COLS*ROWS;
+        // for(var i=0;i<x.length;i++)
+        // {
+        //   if(x[i]>max) max = x[i];
+        // }
+        // console.log("the max load is " + max);
     
 
 
@@ -1187,15 +1257,15 @@ function process_node(i, j, radius, COLS, ROWS, dead_node)
 
             // console.log(aStar.path);
             var k;
-            for ( k=0; k<aStar2.path.length; k++ ) {  
-                if(aStar2.path[k].isEdge()){ 
-                    //chnage the weigth
-                    var current_weight = cy.$("#"+aStar2.path[k].id()).data().weight;
-                    current_weight++;
-                    cy.$("#"+aStar2.path[k].id()).json({"data":{"weight":current_weight}});
-                    cy.$("#"+aStar2.path[k].id()).json({"data":{"label":current_weight}});
-                }
-            }
+            // for ( k=0; k<aStar2.path.length; k++ ) {  
+            //     if(aStar2.path[k].isEdge()){ 
+            //         //chnage the weigth
+            //         var current_weight = cy.$("#"+aStar2.path[k].id()).data().weight;
+            //         current_weight++;
+            //         cy.$("#"+aStar2.path[k].id()).json({"data":{"weight":current_weight}});
+            //         cy.$("#"+aStar2.path[k].id()).json({"data":{"label":current_weight}});
+            //     }
+            // }
         // restore all the deleted elements
         for (k = removed_nodes.length-1; k >= 0; k--) { 
   removed_nodes[k].restore();
