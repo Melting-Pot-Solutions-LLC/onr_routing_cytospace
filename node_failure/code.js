@@ -377,7 +377,7 @@ function display_grid(){
     //   x.push(1);
     // }
 
-    for (var j = 0; j < 10000; j++)
+    for (var j = 0; j < 100000; j++)
     {
       enumerate_random_paths(filtered, [], 0);
     }
