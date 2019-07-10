@@ -15,8 +15,8 @@ function run_the_algorithm(COLS, ROWS, dead_node=""){
 
     
 var data = [];
-var data_average_load_seen_by_packet = []
-var data_average_load_seen_by_packet_standard_deviation = []
+var data_total_load_seen_by_packet = []
+var data_total_load_seen_by_packet_divided_by_number_of_hops = []
 
 function node() 
     {
@@ -377,7 +377,7 @@ function display_grid(){
     //   x.push(1);
     // }
 
-    for (var j = 0; j < 10000; j++)
+    for (var j = 0; j < 5000; j++)
     {
       enumerate_random_paths(filtered, [], 0);
     }
@@ -640,17 +640,20 @@ function display_grid(){
 
 
 
-    // STEP 2: process the routing table second time to calculate the average load seen by a message
-
+    // STEP 2: process the routing table second time to calculate the max load seen by a packet
+    var max_total_load_seen_by_packet = 0;
+    var max_total_load_seen_by_packet_over_number_of_hops = 0;
     for (var i = 0; i < current_routing_table.length; i++)
     {
       if (i%2==0) continue; // skip the node IDs
       else
       {
-        var average_load_seen_by_packet = 0;
+        var load_seen_by_packet = 0;
 
         for (var j = 1; j < current_routing_table[i].length; j++)
         {
+
+
           var current_node_id = current_routing_table[i][j];
           var prev_node_id = current_routing_table[i][j-1];
           var edge_id_1 = "#e-" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1]+ "--" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1];
@@ -658,40 +661,46 @@ function display_grid(){
 
           if (cy.$(edge_id_1).inside())
           {
-            average_load_seen_by_packet += cy.$(edge_id_1).data().weight
+            load_seen_by_packet += cy.$(edge_id_1).data().weight
           } 
           else if (cy.$(edge_id_2).inside())
           {
-            average_load_seen_by_packet += cy.$(edge_id_2).data().weight
+            load_seen_by_packet += cy.$(edge_id_2).data().weight
           }
           else console.log("ERROR finding edge");
         }
-        average_load_seen_by_packet = average_load_seen_by_packet / (current_routing_table[i].length-1);
-        // console.log("For " + current_routing_table[i-1] + " average_load_seen_by_packet is " + average_load_seen_by_packet);
-        data_average_load_seen_by_packet.push(Math.round(average_load_seen_by_packet));
+
+        // check if this load is bigger than before
+        if(load_seen_by_packet > max_total_load_seen_by_packet)
+        {
+          max_total_load_seen_by_packet = load_seen_by_packet;
+          max_total_load_seen_by_packet_over_number_of_hops = Math.round(max_total_load_seen_by_packet/(current_routing_table[i].length-1));
+        }
       }
     }
+    data_total_load_seen_by_packet.push(max_total_load_seen_by_packet);
+    data_total_load_seen_by_packet_divided_by_number_of_hops.push(max_total_load_seen_by_packet_over_number_of_hops);
 
     // find SD for the current routing table
     // find the mean
-    var mean_average_load_seen_by_packet = 0;
-    for (var i = 0; i < current_routing_table.length/2; i++)
-    {
-      mean_average_load_seen_by_packet += data_average_load_seen_by_packet[data_average_load_seen_by_packet.length-i-1];
-    }
-    mean_average_load_seen_by_packet /= (current_routing_table.length/2);
-    mean_average_load_seen_by_packet = Math.round(mean_average_load_seen_by_packet);
+    // var mean_average_load_seen_by_packet = 0;
+    // for (var i = 0; i < current_routing_table.length/2; i++)
+    // {
+    //   mean_average_load_seen_by_packet += data_average_load_seen_by_packet[data_average_load_seen_by_packet.length-i-1];
+    // }
+    // mean_average_load_seen_by_packet /= (current_routing_table.length/2);
+    // mean_average_load_seen_by_packet = Math.round(mean_average_load_seen_by_packet);
 
-    var sd_average_load_seen_by_packet = 0;
-    for (var i = 0; i < current_routing_table.length/2; i++)
-    {
-      sd_average_load_seen_by_packet += Math.pow(mean_average_load_seen_by_packet - data_average_load_seen_by_packet[data_average_load_seen_by_packet.length-i-1], 2);
-    }
+    // var sd_average_load_seen_by_packet = 0;
+    // for (var i = 0; i < current_routing_table.length/2; i++)
+    // {
+    //   sd_average_load_seen_by_packet += Math.pow(mean_average_load_seen_by_packet - data_average_load_seen_by_packet[data_average_load_seen_by_packet.length-i-1], 2);
+    // }
 
-    sd_average_load_seen_by_packet /= (current_routing_table.length/2);
-    sd_average_load_seen_by_packet = Math.round(Math.sqrt(sd_average_load_seen_by_packet));
+    // sd_average_load_seen_by_packet /= (current_routing_table.length/2);
+    // sd_average_load_seen_by_packet = Math.round(Math.sqrt(sd_average_load_seen_by_packet));
 
-    data_average_load_seen_by_packet_standard_deviation.push(sd_average_load_seen_by_packet);
+    // data_average_load_seen_by_packet_standard_deviation.push(sd_average_load_seen_by_packet);
 
 
     x.push(Math.max(right, bot, top, left));
@@ -708,7 +717,7 @@ function display_grid(){
     console.log("\nNOW PLOTTING A HISTOGRAM");
 
 
-      console.log(data_average_load_seen_by_packet_standard_deviation);
+      // console.log(data_average_load_seen_by_packet_standard_deviation);
         var trace = {
             x: x,
             type: 'histogram',
@@ -716,28 +725,28 @@ function display_grid(){
         var data1 = [trace];
 
         var trace_average_load_seen_by_packet = {
-            x: data_average_load_seen_by_packet,
+            x: data_total_load_seen_by_packet,
             type: 'histogram',
           };
         var data2 = [trace_average_load_seen_by_packet];
 
         
         var trace_average_load_seen_by_packet_standard_deviation = {
-            x: data_average_load_seen_by_packet_standard_deviation,
+            x: data_total_load_seen_by_packet_divided_by_number_of_hops,
             type: 'histogram',
           };
         var data3 = [trace_average_load_seen_by_packet_standard_deviation];
 
 
         var layout = {title: {text:'Worst Link Load'}};
-        var layout_average_load_seen_by_packet = {title: {text:'Average Load Seen by a Packet'}};
-        var layout_average_load_seen_by_packet_standard_deviation = {title: {text:'Average Load Seen by a Packet (SD)'}};
+        var layout_worst_total_load_seen_by_packet = {title: {text:'Worst Total Load Seen by Packet'}};
+        var layout_worst_total_load_seen_by_packet_over_number_of_hops = {title: {text:'Worst Total Load Seen by Packet Divided by Number of Hops'}};
 
 
         //Plotly.newPlot('histogram', data1, layout, {showSendToCloud: true});
         //console.log(data_average_load_seen_by_packet);
-        Plotly.newPlot('histogram_average_load_seen_by_packet', data2, layout_average_load_seen_by_packet, {showSendToCloud: true});
-        Plotly.newPlot('histogram_average_load_seen_by_packet_standard_deviation', data3, layout_average_load_seen_by_packet_standard_deviation, {showSendToCloud: true});
+        Plotly.newPlot('histogram_worst_total_load_seen_by_packet', data2, layout_worst_total_load_seen_by_packet, {showSendToCloud: true});
+        Plotly.newPlot('histogram_worst_total_load_seen_by_packet_over_number_of_hops', data3, layout_worst_total_load_seen_by_packet_over_number_of_hops, {showSendToCloud: true});
 
         // var min = COLS*ROWS;
         // for(var i=0;i<x.length;i++)
