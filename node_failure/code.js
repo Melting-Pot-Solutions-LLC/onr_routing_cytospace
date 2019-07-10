@@ -163,7 +163,7 @@ function display_grid(){
 
     console.log(data);
 
-
+  
     var cy = window.cy = cytoscape({
       container: document.getElementById('cy'),
 
@@ -377,7 +377,7 @@ function display_grid(){
     //   x.push(1);
     // }
 
-    for (var j = 0; j < 1000; j++)
+    for (var j = 0; j < 10000; j++)
     {
       enumerate_random_paths(filtered, [], 0);
     }
