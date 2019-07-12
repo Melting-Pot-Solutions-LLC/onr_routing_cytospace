@@ -584,7 +584,7 @@ function display_grid(){
 
   function fully_process_routing_table(current_routing_table)
   {
-    console.log(current_routing_table);
+    // console.log(current_routing_table);
     // console.log("New routing table");
     // console.log(current_routing_table);
 
