@@ -377,7 +377,7 @@ function display_grid(){
     //   x.push(1);
     // }
 
-    for (var j = 0; j < 100000; j++)
+    for (var j = 0; j < 1000000; j++)
     {
       enumerate_random_paths(filtered, [], 0);
     }
@@ -584,6 +584,7 @@ function display_grid(){
 
   function fully_process_routing_table(current_routing_table)
   {
+    console.log(current_routing_table);
     // console.log("New routing table");
     // console.log(current_routing_table);
 
