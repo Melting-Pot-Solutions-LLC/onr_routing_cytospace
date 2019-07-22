@@ -377,14 +377,39 @@ function display_grid(){
     //   x.push(1);
     // }
 
-    for (var j = 0; j < 1000; j++)
+
+    // for (var j = 0; j < 100; j++)
+    // {
+    //   enumerate_random_paths(filtered, [], 0);
+    // }
+
+    var write_to_file = "";
+    for (var i = 0; i < filtered.length; i++)
     {
-      enumerate_random_paths(filtered, [], 0);
+      for(var j = 0; j < filtered[i].length; j++)
+      {
+        write_to_file += filtered[i][j];
+        write_to_file += "\n"
+      }
+      write_to_file += "\n"
     }
-
         
-
-
+    var filename = "save.txt"
+    var file = new Blob([write_to_file]);
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
 
 
 
@@ -592,6 +617,23 @@ function display_grid(){
     // 
     // console.log("FULLY processing a routing table:");
     // console.log(current_routing_table);
+
+
+    // Requiring fs module in which 
+  // writeFile function is defined. 
+  const fs = require('fs') 
+    
+  // Data which will write in a file. 
+  let data = "Learning how to write in a file."
+    
+  // Write data in 'Output.txt' . 
+  fs.writeFile('Output.txt', data, (err) => { 
+        
+      // In case of a error throw err. 
+      if (err) throw err; 
+  }) 
+
+
 
     // console.log("Resetting the links loads...");
     cy.edges().forEach(function( ele ){
