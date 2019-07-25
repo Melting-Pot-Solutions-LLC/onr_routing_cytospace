@@ -378,7 +378,7 @@ function display_grid(){
     // }
 
 
-    for (var j = 0; j < 1000; j++)
+    for (var j = 0; j < 10000; j++)
     {
       enumerate_random_paths(filtered, [], 0);
     }
@@ -616,22 +616,7 @@ function display_grid(){
     // extract the last node
     // 
     // console.log("FULLY processing a routing table:");
-    // console.log(current_routing_table);
-
-
-    // Requiring fs module in which 
-  // writeFile function is defined. 
-  const fs = require('fs') 
-    
-  // Data which will write in a file. 
-  let data = "Learning how to write in a file."
-    
-  // Write data in 'Output.txt' . 
-  fs.writeFile('Output.txt', data, (err) => { 
-        
-      // In case of a error throw err. 
-      if (err) throw err; 
-  }) 
+    // // console.log(current_routing_table);
 
 
 
