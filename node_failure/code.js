@@ -378,38 +378,38 @@ function display_grid(){
     // }
 
 
-    // for (var j = 0; j < 1000000; j++)
-    // {
-    //   enumerate_random_paths(filtered, [], 0);
-    // }
-
-    var write_to_file = "";
-    for (var i = 0; i < filtered.length; i++)
+    for (var j = 0; j < 2; j++)
     {
-      for(var j = 0; j < filtered[i].length; j++)
-      {
-        write_to_file += filtered[i][j];
-        write_to_file += "\n"
-      }
-      write_to_file += "\n"
+      enumerate_random_paths(filtered, [], 0);
     }
+
+    // var write_to_file = "";
+    // for (var i = 0; i < filtered.length; i++)
+    // {
+    //   for(var j = 0; j < filtered[i].length; j++)
+    //   {
+    //     write_to_file += filtered[i][j];
+    //     write_to_file += "\n"
+    //   }
+    //   write_to_file += "\n"
+    // }
         
-    var filename = "save.txt"
-    var file = new Blob([write_to_file]);
-    if (window.navigator.msSaveOrOpenBlob) // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);
-    else { // Others
-        var a = document.createElement("a"),
-                url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
-        }, 0); 
-    }
+    // var filename = "save.txt"
+    // var file = new Blob([write_to_file]);
+    // if (window.navigator.msSaveOrOpenBlob) // IE10+
+    //     window.navigator.msSaveOrOpenBlob(file, filename);
+    // else { // Others
+    //     var a = document.createElement("a"),
+    //             url = URL.createObjectURL(file);
+    //     a.href = url;
+    //     a.download = filename;
+    //     document.body.appendChild(a);
+    //     a.click();
+    //     setTimeout(function() {
+    //         document.body.removeChild(a);
+    //         window.URL.revokeObjectURL(url);  
+    //     }, 0); 
+    // }
 
 
 
@@ -609,7 +609,7 @@ function display_grid(){
 
   function fully_process_routing_table(current_routing_table)
   {
-    // console.log(current_routing_table);
+    console.log(current_routing_table);
     // console.log("New routing table");
     // console.log(current_routing_table);
 
