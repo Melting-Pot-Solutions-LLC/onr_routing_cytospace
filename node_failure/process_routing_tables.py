@@ -38,8 +38,8 @@ def enumerate_random_paths(array_of_paths):
 def extract_coordinates_from_node(node_string):
 	ret = [];
 	new_node_string = node_string.replace("#n-", "")
-	ret.append(int(new_node_string[:new_node_string.index(-)])); # add i
-	ret.append(int(new_node_string[new_node_string.index(-)+1:])); # add j
+	ret.append(int(new_node_string[:new_node_string.index("-")])); # add i
+	ret.append(int(new_node_string[new_node_string.index("-")+1:])); # add j
 	return ret;
 
 def get_direction_of_link(node_from, node_to):
@@ -64,15 +64,27 @@ def fully_process_routing_table(current_routing_table):
 	# STEP 1: process the routing table for the first time, update the edges weights according to how many messages will go along each link
 	for node, path in current_routing_table.items():
 		array_of_nodes_in_path = path.split(",")
-		for i in range(1, len(array_of_nodes_in_path)-1):
+		for i in range(1, len(array_of_nodes_in_path)):
 			node_to = extract_coordinates_from_node(array_of_nodes_in_path[i])
 			node_from = extract_coordinates_from_node(array_of_nodes_in_path[i-1])
+			# print("node_from" + str(node_from))
 			direction = get_direction_of_link(node_from, node_to)
+			edge_number = 0
+			base_edge = node_from[1]*COLS*2 + node_from[0]
 			if(direction == "up"):
+				edge_number = base_edge  - COLS
 			elif (direction == "down"):
+				edge_number = base_edge  + COLS
 			elif (direction == "right"):
-			else: #left
-				
+				edge_number = base_edge 
+			elif (direction == "left"): #left
+				edge_number = base_edge - 1
+			else:
+				print("ERROR DETERMINING THE DIRECTION OF THE MESSAGE")
+			print("Increasing edge count for #" + str(edge_number))
+			link_load[edge_number] = link_load[edge_number] + 1
+	print(link_load)
+
 
 
 
@@ -91,81 +103,81 @@ def fully_process_routing_table(current_routing_table):
     #   else
     #   {
 
-        for (var j = 1; j < current_routing_table[i].length; j++)
-        {
-          var current_node_id = current_routing_table[i][j];
-          var prev_node_id = current_routing_table[i][j-1];
-          var edge_id_1 = "#e-" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1]+ "--" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1];
-          var edge_id_2 = "#e-" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1]+ "--" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1];
-          if (cy.$(edge_id_1).inside())
-          {
-            var current_weight = cy.$(edge_id_1).data().weight;
-            current_weight++;
-            cy.$(edge_id_1).json({"data":{"weight":current_weight}});
-            cy.$(edge_id_1).json({"data":{"label":current_weight}});
-          } 
-          else if (cy.$(edge_id_2).inside())
-          {
-            var current_weight = cy.$(edge_id_2).data().weight;
-            current_weight++;
-            cy.$(edge_id_2).json({"data":{"weight":current_weight}});
-            cy.$(edge_id_2).json({"data":{"label":current_weight}});
-          }
-          else console.log("ERROR finding edge");
-        }
+        # for (var j = 1; j < current_routing_table[i].length; j++)
+        # {
+        #   var current_node_id = current_routing_table[i][j];
+        #   var prev_node_id = current_routing_table[i][j-1];
+        #   var edge_id_1 = "#e-" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1]+ "--" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1];
+        #   var edge_id_2 = "#e-" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1]+ "--" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1];
+        #   if (cy.$(edge_id_1).inside())
+        #   {
+        #     var current_weight = cy.$(edge_id_1).data().weight;
+        #     current_weight++;
+        #     cy.$(edge_id_1).json({"data":{"weight":current_weight}});
+        #     cy.$(edge_id_1).json({"data":{"label":current_weight}});
+        #   } 
+        #   else if (cy.$(edge_id_2).inside())
+        #   {
+        #     var current_weight = cy.$(edge_id_2).data().weight;
+        #     current_weight++;
+        #     cy.$(edge_id_2).json({"data":{"weight":current_weight}});
+        #     cy.$(edge_id_2).json({"data":{"label":current_weight}});
+        #   }
+        #   else console.log("ERROR finding edge");
+        # }
     #   }
     # }
 
 
 
-    // STEP 2: process the routing table second time to calculate the max load seen by a packet
-    var max_total_load_seen_by_packet = 0;
-    var max_total_load_seen_by_packet_over_number_of_hops = 0;
-    for (var i = 0; i < current_routing_table.length; i++)
-    {
-      if (i%2==0) continue; // skip the node IDs
-      else
-      {
-        var load_seen_by_packet = 0;
+  #   // STEP 2: process the routing table second time to calculate the max load seen by a packet
+  #   var max_total_load_seen_by_packet = 0;
+  #   var max_total_load_seen_by_packet_over_number_of_hops = 0;
+  #   for (var i = 0; i < current_routing_table.length; i++)
+  #   {
+  #     if (i%2==0) continue; // skip the node IDs
+  #     else
+  #     {
+  #       var load_seen_by_packet = 0;
 
-        for (var j = 1; j < current_routing_table[i].length; j++)
-        {
-
-
-          var current_node_id = current_routing_table[i][j];
-          var prev_node_id = current_routing_table[i][j-1];
-          var edge_id_1 = "#e-" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1]+ "--" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1];
-          var edge_id_2 = "#e-" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1]+ "--" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1];
-
-          if (cy.$(edge_id_1).inside())
-          {
-            load_seen_by_packet += cy.$(edge_id_1).data().weight
-          } 
-          else if (cy.$(edge_id_2).inside())
-          {
-            load_seen_by_packet += cy.$(edge_id_2).data().weight
-          }
-          else console.log("ERROR finding edge");
-        }
-
-        // check if this load is bigger than before
-        if(load_seen_by_packet > max_total_load_seen_by_packet)
-        {
-          max_total_load_seen_by_packet = load_seen_by_packet;
-          max_total_load_seen_by_packet_over_number_of_hops = Math.round(max_total_load_seen_by_packet/(current_routing_table[i].length-1));
-        }
-      }
-    }
-    data_total_load_seen_by_packet.push(max_total_load_seen_by_packet);
-    data_total_load_seen_by_packet_divided_by_number_of_hops.push(max_total_load_seen_by_packet_over_number_of_hops);
+  #       for (var j = 1; j < current_routing_table[i].length; j++)
+  #       {
 
 
+  #         var current_node_id = current_routing_table[i][j];
+  #         var prev_node_id = current_routing_table[i][j-1];
+  #         var edge_id_1 = "#e-" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1]+ "--" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1];
+  #         var edge_id_2 = "#e-" + extract_i_j_from_id(prev_node_id)[0]+"-"+extract_i_j_from_id(prev_node_id)[1]+ "--" + extract_i_j_from_id(current_node_id)[0]+"-"+extract_i_j_from_id(current_node_id)[1];
 
-    x.push(Math.max(right, bot, top, left));
-    number_of_random_routs++;
+  #         if (cy.$(edge_id_1).inside())
+  #         {
+  #           load_seen_by_packet += cy.$(edge_id_1).data().weight
+  #         } 
+  #         else if (cy.$(edge_id_2).inside())
+  #         {
+  #           load_seen_by_packet += cy.$(edge_id_2).data().weight
+  #         }
+  #         else console.log("ERROR finding edge");
+  #       }
+
+  #       // check if this load is bigger than before
+  #       if(load_seen_by_packet > max_total_load_seen_by_packet)
+  #       {
+  #         max_total_load_seen_by_packet = load_seen_by_packet;
+  #         max_total_load_seen_by_packet_over_number_of_hops = Math.round(max_total_load_seen_by_packet/(current_routing_table[i].length-1));
+  #       }
+  #     }
+  #   }
+  #   data_total_load_seen_by_packet.push(max_total_load_seen_by_packet);
+  #   data_total_load_seen_by_packet_divided_by_number_of_hops.push(max_total_load_seen_by_packet_over_number_of_hops);
 
 
-  }
+
+  #   x.push(Math.max(right, bot, top, left));
+  #   number_of_random_routs++;
+
+
+  # }
 
 
 
@@ -212,13 +224,19 @@ while i<(len(ar)-1):
 
 
 # generate a routing table
-for i in range(100):
-	routing_table = enumerate_random_paths(my_dict)
+# for i in range(100):
+# 	routing_table = enumerate_random_paths(my_dict)
+# 	fully_process_routing_table(routing_table)
 
 # process routing tables
 
 
+routing_table = enumerate_random_paths(my_dict)
+routing_table = {'#n-3-2': '#n-3-2,#n-4-2,#n-4-1,#n-4-0,#n-0-0', '#n-3-3': '#n-3-3,#n-3-4,#n-4-4,#n-4-0,#n-0-0', '#n-3-0': '#n-3-0,#n-4-0,#n-0-0', '#n-3-1': '#n-3-1,#n-4-1,#n-0-1,#n-0-0', '#n-3-4': '#n-3-4,#n-3-0,#n-4-0,#n-0-0', '#n-4-4': '#n-4-4,#n-4-0,#n-0-0', '#n-4-1': '#n-4-1,#n-4-0,#n-0-0', '#n-4-0': '#n-4-0,#n-0-0', '#n-4-3': '#n-4-3,#n-4-4,#n-4-0,#n-0-0', '#n-4-2': '#n-4-2,#n-0-2,#n-0-1,#n-0-0', '#n-0-2': '#n-0-2,#n-0-1,#n-0-0', '#n-2-2': '#n-2-2,#n-2-1,#n-2-0,#n-1-0,#n-0-0', '#n-1-4': '#n-1-4,#n-0-4,#n-0-0', '#n-1-0': '#n-1-0,#n-0-0', '#n-1-1': '#n-1-1,#n-0-1,#n-0-0', '#n-1-2': '#n-1-2,#n-0-2,#n-0-1,#n-0-0', '#n-1-3': '#n-1-3,#n-1-4,#n-1-0,#n-0-0', '#n-0-1': '#n-0-1,#n-0-0', '#n-0-3': '#n-0-3,#n-0-4,#n-0-0', '#n-2-4': '#n-2-4,#n-1-4,#n-0-4,#n-0-0', '#n-2-3': '#n-2-3,#n-2-4,#n-1-4,#n-1-0,#n-0-0', '#n-0-4': '#n-0-4,#n-0-0', '#n-2-1': '#n-2-1,#n-1-1,#n-0-1,#n-0-0', '#n-2-0': '#n-2-0,#n-1-0,#n-0-0'}
+print(routing_table)
+fully_process_routing_table(routing_table)
 
+#[0, 2, 1, 2, 2, 5, 1, 1, 2, 1, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 3, 3, 1, 2, 1, 0, 2, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 
 
