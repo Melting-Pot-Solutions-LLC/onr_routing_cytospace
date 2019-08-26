@@ -3,18 +3,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 # %matplotlib inline
-x = np.random.normal(size = 1000)
-plt.hist(x, bins=30) # density
-plt.ylabel('Probability')
-plt.show()
+
 
 
 
 """
 GLOBAL VARIABLES
 """
-ROWS = 5
-COLS = 5
+ROWS = 10
+COLS = 10
 
 link_load = []
 max_total_load_seen_by_packet_over_number_of_hops_array = []
@@ -248,9 +245,12 @@ while i<(len(ar)-1):
 
 
 # generate a routing table
-for i in range(10):
+for i in range(100):
 	routing_table = enumerate_random_paths(my_dict)
 	fully_process_routing_table(routing_table)
+	# print("Table is processed")
+	# if(i%100 == 0 and i != 0):
+	# print("done with another 100 routing tables")
 
 # print("\n")
 # print("max_total_load_seen_by_packet_array - " + str(max_total_load_seen_by_packet_array))
@@ -268,7 +268,11 @@ for i in range(10):
 
 
 file.close()
-
+x = np.random.normal(size = 1000)
+plt.hist(max_total_load_seen_by_packet_over_number_of_hops_array) # density
+plt.ylabel('Probability')
+plt.show()
+print(x)
 
 
 
