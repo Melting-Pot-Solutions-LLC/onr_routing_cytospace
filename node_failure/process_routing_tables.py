@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
+
+import math
 import matplotlib.pyplot as plt
 import numpy as np
+import sys 
+import statistics
 # %matplotlib inline
 
 
@@ -10,16 +14,19 @@ import numpy as np
 """
 GLOBAL VARIABLES
 """
-ROWS = 10
-COLS = 10
+ROWS = 5
+COLS = 5
 
 link_load = []
 max_total_load_seen_by_packet_over_number_of_hops_array = []
 max_total_load_seen_by_packet_array = []
+loads_seen_by_packet = []
 
 for i in range(ROWS*COLS*2):
 	link_load.append(0)
 
+for i in range(ROWS*COLS):
+	loads_seen_by_packet.append(0)
 
 """
 SUPPORTING FUNCTIONS
@@ -75,9 +82,52 @@ def get_direction_of_link(node_from, node_to):
 
 
 
+
+
+
+
+
+def create_a_table_with_average_link_load(current_routing_table):
+	global link_load
+	global loads_seen_by_packet
+
+	table = []
+	for i in range(ROWS/2 + COLS/2 + 1):
+		table.append({
+		"number_of_hops": i,
+		"number_of_packets": 0,
+		"loads": [],
+		"average_link_load": 0,
+		"stddev_link_load": 0,
+		})
+
+
+	for node, path in current_routing_table.items():
+		array_of_nodes_in_path = path.split(",")
+		number_of_hops = len(array_of_nodes_in_path) - 1
+		table[number_of_hops]["number_of_packets"] = table[number_of_hops]["number_of_packets"] + 1
+		table[number_of_hops]["loads"].append(loads_seen_by_packet[extract_coordinates_from_node(node)[1]*COLS + extract_coordinates_from_node(node)[0]])
+
+	table.pop(0)
+	
+	for i in table:
+		i["average_link_load"] = statistics.mean(i["loads"])
+		i["stddev_link_load"] = statistics.stdev(i["loads"])
+
+
+	print(table)
+
+
+
+
+
 def fully_process_routing_table(current_routing_table):
+	
 	global link_load
 	reset_link_load()
+	
+
+	
 
 	# STEP 1: process the routing table for the first time, update the edges weights according to how many messages will go along each link
 	for node, path in current_routing_table.items():
@@ -108,6 +158,32 @@ def fully_process_routing_table(current_routing_table):
 			link_load[edge_number] = link_load[edge_number] + 1
 	# print(link_load)
 
+	# find out if the current routing table is ideal
+	ideal_load_per_side = 0
+	if ROWS == 1 or COLS == 1:
+		ideal_load_per_side = math.ceil((ROWS*COLS - 1)/2)
+	elif ROWS == 2 or COLS == 2:
+		ideal_load_per_side = math.ceil((ROWS*COLS - 1)/3)
+	else:
+		ideal_load_per_side = math.ceil((ROWS*COLS - 1)/4)
+
+	if link_load[0] <= ideal_load_per_side and link_load[COLS-1] <= ideal_load_per_side and link_load[COLS] <= ideal_load_per_side and link_load[COLS*ROWS*2-COLS] <= ideal_load_per_side:
+		print("FOUND THE BEST ROUTING TABLE")
+		# print("ideal_load_per_side = " + str(ideal_load_per_side))
+		# print("right load = " + str(link_load[0]))
+		# print("left load = " + str(link_load[COLS-1]))
+		# print("down load = " + str(link_load[COLS]))
+		# print("up load = " + str(link_load[COLS*ROWS*2-COLS]))
+		# print(current_routing_table)
+		create_a_table_with_average_link_load(current_routing_table)
+		sys.exit()
+
+		
+		
+
+
+
+
 	# STEP 2: process the routing table second time to calculate the max load seen by a packet
 	max_total_load_seen_by_packet = 0
 	max_total_load_seen_by_packet_over_number_of_hops = 0
@@ -135,14 +211,18 @@ def fully_process_routing_table(current_routing_table):
 			else:
 				print("ERROR DETERMINING THE DIRECTION OF THE MESSAGE")
 			load_seen_by_packet = load_seen_by_packet + link_load[edge_number]
-			# print("load_seen_by_packet " + str(load_seen_by_packet))
-		if load_seen_by_packet > max_total_load_seen_by_packet :
+		loads_seen_by_packet[extract_coordinates_from_node(node)[1]*COLS + extract_coordinates_from_node(node)[0]] = load_seen_by_packet
+
+		if (load_seen_by_packet > max_total_load_seen_by_packet) :
 			max_total_load_seen_by_packet = load_seen_by_packet
 			max_total_load_seen_by_packet_over_number_of_hops = float(max_total_load_seen_by_packet) / (len(array_of_nodes_in_path)-1)
 	# print("max_total_load_seen_by_packet - " + str(max_total_load_seen_by_packet))
 	# print("max_total_load_seen_by_packet_over_number_of_hops - " + str(max_total_load_seen_by_packet_over_number_of_hops))
 	max_total_load_seen_by_packet_over_number_of_hops_array.append(max_total_load_seen_by_packet_over_number_of_hops)
 	max_total_load_seen_by_packet_array.append(max_total_load_seen_by_packet)
+	# create_a_table_with_average_link_load(current_routing_table)
+
+
 
 
 
@@ -267,12 +347,17 @@ for i in range(100):
 
 
 
+
+
+
+
+
 file.close()
-x = np.random.normal(size = 1000)
-plt.hist(max_total_load_seen_by_packet_over_number_of_hops_array) # density
-plt.ylabel('Probability')
-plt.show()
-print(x)
+# x = np.random.normal(size = 1000)
+# plt.hist(max_total_load_seen_by_packet_over_number_of_hops_array) # density
+# plt.ylabel('Probability')
+# plt.show()
+# print(x)
 
 
 

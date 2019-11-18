@@ -1,107 +1,79 @@
 <!DOCTYPE>
 <!-- This code is for demonstration purposes only.  You should not hotlink to Github, Rawgit, or files from the Cytoscape.js documentation in your production apps. -->
 <html>
-  <head>
-      <title>PhD Research</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-  <script src="https://ajax.aspnetcdn.com/ajax/4.0/MicrosoftAjax.js" type="text/javascript"></script> 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> -->
 
+    <head>
+        <title>PhD Research</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+        <script src="https://ajax.aspnetcdn.com/ajax/4.0/MicrosoftAjax.js" type="text/javascript"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> -->
+        <!-- For loading external data files -->
+        <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise,fetch"></script>
+        <script src="cytoscape.min.js"></script>
+        <!-- for testing with local version of cytoscape.js -->
+        <!-- <script src="../cytoscape.js/build/cytoscape.js"></script> -->
+        <!-- Plotly.js  to draw histograms-->
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <!-- <script src="https://ajax.aspnetcdn.com/ajax/4.0/MicrosoftAjax.js" type="text/javascript"></script>  -->
+        <link href="style.css" rel="stylesheet" />
+    </head>
 
-    <!-- For loading external data files -->
-    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise,fetch"></script>
-
-    <script src="cytoscape.min.js"></script>
-
-    <!-- for testing with local version of cytoscape.js -->
-    <!-- <script src="../cytoscape.js/build/cytoscape.js"></script> -->
-    <!-- Plotly.js  to draw histograms-->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <!-- <script src="https://ajax.aspnetcdn.com/ajax/4.0/MicrosoftAjax.js" type="text/javascript"></script>  -->
-
-    <link href="style.css" rel="stylesheet" />
-  </head>
-  <body>
-    
-
-<div class="container">
-
-    <h1 id="header">10x10 Mesh Network with Dijkstra Algorithm (forcing packets to be routed via minimum hop paths)</h1>
-
-
-<div class="row">
-  <div class="col-lg-6">
-    <div class="input-group">
-      
-      <input type="number" class="form-control" placeholder="Rows" id="rows">
-      <span class="input-group-btn">
-        <button class="btn btn-default" type="button" id="update_rows">Update!</button>
-      </span>
-    </div><!-- /input-group -->
-  </div><!-- /.col-lg-6 -->
-  <div class="col-lg-6">
-    <div class="input-group">
-      <input type="number" class="form-control" placeholder="Columns" id="cols">
-      <span class="input-group-btn">
-        <button class="btn btn-default" type="button" id="update_cols">Update!</button>
-      </span>
-    </div><!-- /input-group -->
-  </div><!-- /.col-lg-6 -->
-</div><!-- /.row -->
-
-
-</div>
-
-    <div class="container">
-    <div id="cy"></div>
-    <!-- Load application code at the end to ensure DOM is loaded -->
-    </div>
-    <div id="histogram"></div>
-    <div id="histogram_worst_total_load_seen_by_packet"></div>
-    <div id="histogram_worst_total_load_seen_by_packet_over_number_of_hops"></div>
-
-    <script src="code.js"></script>
-  </body>
-
-
-
-<script type="text/javascript">
-    $(document).ready(function(){
-      var cols = 10;
-      var rows = 10;
-      // run_the_algorithm(cols, rows, "#n-1-0");
-      run_the_algorithm(cols, rows);
-      
-
-
-
+    <body>
+        <div class="container">
+            <h1 id="header">10x10 Mesh Network with Dijkstra Algorithm (forcing packets to be routed via minimum hop paths)</h1>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <input type="number" class="form-control" placeholder="Rows" id="rows">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="update_rows">Update!</button>
+                        </span>
+                    </div><!-- /input-group -->
+                </div><!-- /.col-lg-6 -->
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <input type="number" class="form-control" placeholder="Columns" id="cols">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="update_cols">Update!</button>
+                        </span>
+                    </div><!-- /input-group -->
+                </div><!-- /.col-lg-6 -->
+            </div><!-- /.row -->
+        </div>
+        <div class="container">
+            <div id="cy"></div>
+            <!-- Load application code at the end to ensure DOM is loaded -->
+        </div>
+        <div id="histogram"></div>
+        <div id="histogram_worst_total_load_seen_by_packet"></div>
+        <div id="histogram_worst_total_load_seen_by_packet_over_number_of_hops"></div>
+        <script src="code.js"></script>
+    </body>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        var cols = 5;
+        var rows = 5;
+        // run_the_algorithm(cols, rows, "#n-1-0");
+        run_the_algorithm(cols, rows);
         $("#update_rows").click(function() {
             rows = $("#rows").val();
             update_the_header();
         });
-
-
         $("#update_cols").click(function() {
             cols = $("#cols").val();
             update_the_header();
-            
         });
 
-        function update_the_header()
-        {
-          $("#header").text(rows + "x" + cols + " Mesh Network with Dijkstra Algorithm");
-          console.log("cols - " + cols);
-          console.log("rows - " + rows);
-          run_the_algorithm(parseInt(cols), parseInt(rows));
-          
-
+        function update_the_header() {
+            $("#header").text(rows + "x" + cols + " Mesh Network with Dijkstra Algorithm");
+            console.log("cols - " + cols);
+            console.log("rows - " + rows);
+            run_the_algorithm(parseInt(cols), parseInt(rows));
         }
-
     })
-</script>
-
+    </script>
 
 </html>
