@@ -50,7 +50,8 @@ function run_the_algorithm(COLS, ROWS, dead_node = "") {
                     "locked": false,
                     "grabbable": true,
                     // if the node is dead, then assign "dead" class which makes the colo red
-                    "classes": (dead_node == j * COLS + i) ? "dead" : ""
+                    "classes": (dead_node == j * COLS + i) ? "dead" : "",
+                    "holds_packet": false,
                     // "classes": nodes_original[j*COLS+i].dead?"dead":""
                 });
             }
@@ -74,7 +75,8 @@ function run_the_algorithm(COLS, ROWS, dead_node = "") {
                         "selectable": true,
                         "locked": true,
                         "grabbable": true,
-                        "classes": "outline"
+                        "classes": "outline",
+                        "number_of_packets_processing": 0
                     });
                 } else // if the element is  at the last row -- wrap around to the 0th row
                 {
@@ -93,7 +95,8 @@ function run_the_algorithm(COLS, ROWS, dead_node = "") {
                         "selectable": true,
                         "locked": true,
                         "grabbable": true,
-                        "classes": "outline unbundled-bezier"
+                        "classes": "outline unbundled-bezier",
+                        "number_of_packets_processing": 0
                     });
                 }
                 if (i != COLS - 1) { // if the element is not at the last row
@@ -112,7 +115,8 @@ function run_the_algorithm(COLS, ROWS, dead_node = "") {
                         "selectable": true,
                         "locked": true,
                         "grabbable": true,
-                        "classes": "outline"
+                        "classes": "outline",
+                        "number_of_packets_processing": 0
                     });
                 } else { // if the element is at the last row -- wrap around
                     data.push({
@@ -130,7 +134,8 @@ function run_the_algorithm(COLS, ROWS, dead_node = "") {
                         "selectable": true,
                         "locked": true,
                         "grabbable": true,
-                        "classes": "outline unbundled-bezier"
+                        "classes": "outline unbundled-bezier",
+                        "number_of_packets_processing": 0
                     });
                 }
             }

@@ -344,13 +344,19 @@ while i<(len(ar)-1):
 		my_dict[ar[j]].append(ar[i])
 	i = i+1
  
-
+import json
 
 # generate a routing table
-for i in range(2):
+for i in range(1):
 	routing_table = enumerate_random_paths(my_dict)
-	fully_process_routing_table(routing_table)
-	create_a_table_with_average_link_load(routing_table)
+	# fully_process_routing_table(routing_table)
+	# create_a_table_with_average_link_load(routing_table)
+	print(routing_table)
+	print(type(routing_table))
+
+	r = json.dumps(routing_table)
+	print(r)
+	print(type(r))
 	# print("Table is processed")
 	# if(i%100 == 0 and i != 0):
 	# print("done with another 100 routing tables")

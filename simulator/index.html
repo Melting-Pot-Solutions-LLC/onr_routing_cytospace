@@ -44,6 +44,17 @@
             </div><!-- /.row -->
         </div>
         <div class="container">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                </div>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01" accept="text/plain">
+                    <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                </div>
+            </div>
+        </div>
+        <div class="container">
             <div id="cy"></div>
             <!-- Load application code at the end to ensure DOM is loaded -->
         </div>
@@ -51,13 +62,14 @@
         <div id="histogram_worst_total_load_seen_by_packet"></div>
         <div id="histogram_worst_total_load_seen_by_packet_over_number_of_hops"></div>
         <script src="code.js"></script>
+        <script src="simulator.js"></script>
     </body>
     <script type="text/javascript">
     $(document).ready(function() {
         var cols = 6;
         var rows = 12;
         // run_the_algorithm(cols, rows, "#n-1-0");
-        run_the_algorithm(cols, rows);
+        // run_the_algorithm(cols, rows);
         $("#update_rows").click(function() {
             rows = $("#rows").val();
             update_the_header();
@@ -71,7 +83,7 @@
             $("#header").text(rows + "x" + cols + " Mesh Network with Dijkstra Algorithm");
             console.log("cols - " + cols);
             console.log("rows - " + rows);
-            run_the_algorithm(parseInt(cols), parseInt(rows));
+            //run_the_algorithm(parseInt(cols), parseInt(rows));
         }
     })
     </script>
