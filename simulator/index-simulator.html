@@ -1,0 +1,70 @@
+<!DOCTYPE>
+<!-- This code is for demonstration purposes only.  You should not hotlink to Github, Rawgit, or files from the Cytoscape.js documentation in your production apps. -->
+<html>
+
+    <head>
+        <title>PhD Research</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+        <script src="https://ajax.aspnetcdn.com/ajax/4.0/MicrosoftAjax.js" type="text/javascript"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> -->
+        <!-- For loading external data files -->
+        <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise,fetch"></script>
+        <script src="cytoscape.min.js"></script>
+        <!-- for testing with local version of cytoscape.js -->
+        <!-- <script src="../cytoscape.js/build/cytoscape.js"></script> -->
+        <!-- Plotly.js  to draw histograms-->
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <!-- <script src="https://ajax.aspnetcdn.com/ajax/4.0/MicrosoftAjax.js" type="text/javascript"></script>  -->
+        <link href="style.css" rel="stylesheet" />
+    </head>
+
+    <body>
+        <div class="container">
+            <h1 id="header">10x10 Mesh Network Simulator (forcing packets to be routed via minimum hop paths)</h1>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <input type="number" class="form-control" placeholder="Rows" id="rows">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="update_rows">Update!</button>
+                        </span>
+                    </div><!-- /input-group -->
+                </div><!-- /.col-lg-6 -->
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <input type="number" class="form-control" placeholder="Columns" id="cols">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="update_cols">Update!</button>
+                        </span>
+                    </div><!-- /input-group -->
+                </div><!-- /.col-lg-6 -->
+            </div><!-- /.row -->
+        </div>
+        <div class="container">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                </div>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01" accept="text/plain">
+                    <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div id="cy"></div>
+            <!-- Load application code at the end to ensure DOM is loaded -->
+        </div>
+        <script src="simulator.js"></script>
+    </body>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        var cols = 6;
+        var rows = 12;
+    })
+    </script>
+
+</html>

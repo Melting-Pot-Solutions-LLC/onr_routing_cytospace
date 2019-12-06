@@ -328,98 +328,9 @@ function run_the_algorithm(COLS, ROWS, dead_node = "") {
                 window.URL.revokeObjectURL(url);
             }, 0);
         }
-        // for(radius = 1 ; radius <= COLS + ROWS; radius++) { // traverse in circles
-        //   // radius = 2;
-        //   kk = ll= ii =0;
-        //   mm = ROWS;
-        //   nn = COLS;
         for (j = 0; j < ROWS; j++) {
             for (i = 0; i < COLS; i++) {
                 process_node(i, j, radius, COLS, ROWS, dead_node);
-                /*  kk - starting row index 
-                mm - ending row index 
-                ll - starting column index 
-                nn - ending column index 
-                ii - iterator 
-                */
-                // CLOCK WISE
-                // while (kk < mm && ll < nn) 
-                // {
-                //     // Print the first row from the remaining rows 
-                //     for (ii = ll; ii < nn; ++ii) 
-                //     { 
-                //       // console.log("#n-"+kk+"-"+ii);
-                //       process_node(ii, kk, radius, COLS, ROWS, dead_node);
-                //     } 
-                //     kk++; 
-                //     // Print the last column from the remaining columns  
-                //     for (ii = kk; ii < mm; ++ii) 
-                //     { 
-                //       // console.log("#n-"+ii+"-"+(nn-1));
-                //       process_node((nn-1), ii, radius, COLS, ROWS, dead_node);
-                //     } 
-                //     nn--; 
-                //     // Print the last row from the remaining rows */ 
-                //     if ( kk < mm) 
-                //     { 
-                //         for (ii = nn-1; ii >= ll; --ii) 
-                //         { 
-                //           // console.log("#n-"+(mm-1)+"-"+ii);
-                //           process_node(ii, (mm-1), radius, COLS, ROWS, dead_node);
-                //         } 
-                //         mm--; 
-                //     } 
-                //     // Print the first column from the remaining columns */ 
-                //     if (ll < nn) 
-                //     { 
-                //         for (ii = mm-1; ii >= kk; --ii) 
-                //         { 
-                //           // console.log("#n-"+ii+"-"+ll);
-                //           process_node(ll, ii, radius, COLS, ROWS, dead_node);
-                //         } 
-                //         ll++;     
-                //     }         
-                // } 
-                // COUNTER CLOCK WISE
-                // while (kk < mm && ll < nn) 
-                // { 
-                //     // Print the first column from the remaining columns */ 
-                //     if (ll < nn) 
-                //     { 
-                //         for (ii = kk; ii <= mm-1; ++ii) 
-                //         { 
-                //            // console.log("#n-"+ii+"-"+ll);
-                //           process_node(ll, ii, radius, COLS, ROWS);
-                //         } 
-                //         ll++;     
-                //     }         
-                //     // Print the last row from the remaining rows */ 
-                //     if ( kk < mm) 
-                //     { 
-                //         for (ii = ll; ii <= nn-1; ++ii) 
-                //         { 
-                //           // console.log("#n-"+(mm-1)+"-"+ii);
-                //           process_node(ii, (mm-1), radius, COLS, ROWS);
-                //         } 
-                //         mm--; 
-                //     } 
-                //     // Print the last column from the remaining columns  
-                //     for (ii = mm; ii > kk; --ii) 
-                //     { 
-                //       // console.log("#n-"+ii+"-"+(nn-1));
-                //       process_node((nn-1), ii, radius, COLS, ROWS);
-                //     } 
-                //     nn--; 
-                //     // Print the first row from the remaining rows 
-                //     for (ii = nn; ii > ll; --ii) 
-                //     { 
-                //       // console.log("#n-"+kk+"-"+ii);
-                //       process_node(ii, kk, radius, COLS, ROWS);
-                //     } 
-                //     kk++; 
-                // process_node(i, j, radius, COLS, ROWS);
-                //   } 
-                // }
             }
         }
 
