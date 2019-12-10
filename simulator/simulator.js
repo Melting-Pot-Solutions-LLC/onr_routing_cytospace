@@ -15,6 +15,13 @@ function getRandomLinkDelay() {
     return 35;
 }
 
+function extract_i_j_from_id(id) {
+    ret = [];
+    ret.push(parseInt(id.substring(3, id.lastIndexOf("-")))); // add i
+    ret.push(parseInt(id.substring(id.lastIndexOf("-") + 1))); // add j
+    return ret;
+}
+
 function countObjectsInJSON(json_object) {
     var count = 0;
     for (var prop in json_object) {
@@ -94,7 +101,9 @@ function initialize_network() {
                         "locked": true,
                         "grabbable": true,
                         "classes": "outline",
-                        "number_of_packets_processing": 0
+                        "number_of_packets_processing": 0,
+                        "packets_about_to_be_processed": [],
+                        "packets_current_processing": []
                     });
                 } else // if the element is  at the last row -- wrap around to the 0th row
                 {
@@ -114,7 +123,9 @@ function initialize_network() {
                         "locked": true,
                         "grabbable": true,
                         "classes": "outline unbundled-bezier",
-                        "number_of_packets_processing": 0
+                        "number_of_packets_processing": 0,
+                        "packets_about_to_be_processed": [],
+                        "packets_current_processing": []
                     });
                 }
                 if (i != COLS - 1) { // if the element is not at the last row
@@ -134,7 +145,9 @@ function initialize_network() {
                         "locked": true,
                         "grabbable": true,
                         "classes": "outline",
-                        "number_of_packets_processing": 0
+                        "number_of_packets_processing": 0,
+                        "packets_about_to_be_processed": [],
+                        "packets_current_processing": []
                     });
                 } else { // if the element is at the last row -- wrap around
                     data.push({
@@ -153,7 +166,9 @@ function initialize_network() {
                         "locked": true,
                         "grabbable": true,
                         "classes": "outline unbundled-bezier",
-                        "number_of_packets_processing": 0
+                        "number_of_packets_processing": 0,
+                        "packets_about_to_be_processed": [],
+                        "packets_current_processing": []
                     });
                 }
             }
@@ -268,7 +283,12 @@ reader.addEventListener('load', function(e) {
     var json_str = JSON.parse(text);
     // console.log(json_str);
     console.log("FOUND " + countObjectsInJSON(json_str) + " PATHS IN THE ROUTING TABLE");
-    simulate_routing_table(json_str, 1);
+    new_routing_tabe = {};
+    for (var node in json_str) {
+        new_routing_tabe[node] = json_str[node].split(",");
+    }
+    // console.log(new_routing_tabe);
+    simulate_routing_table(new_routing_tabe, 1);
 });
 //
 //
@@ -291,6 +311,7 @@ function simulate_routing_table(routing_table_json, number_of_cycles) {
     }
 
     function packet() {
+        this.origin = "";
         this.status = "inside_a_node";
         this.node_packet_is_in = "";
         this.link_packet_is_in = "";
@@ -305,6 +326,13 @@ function simulate_routing_table(routing_table_json, number_of_cycles) {
     for (var k = 0; k < COLS * ROWS - 1; k++) {
         packets.push(new packet());
     }
+    // initialize packets
+    for (var i = 0; i < packets.length; i++) {
+        packets[i].origin = Object.keys(routing_table_json)[i];
+        packets[i].current_node = Object.keys(routing_table_json)[i];
+        packets[i].status = "inside_a_node";
+    }
+    // core simulation
     for (var cycle = 0; cycle < number_of_cycles; cycle++) {
         console.log("STARTING PROCESSING CYCLE #" + cycle);
         for (var i = 0; i < packets.length; i++) {
@@ -312,15 +340,29 @@ function simulate_routing_table(routing_table_json, number_of_cycles) {
             // for (var node in routing_table_json) {
             //     current_path = routing_table_json[node]
             // }
+            var origin = Object.keys(routing_table_json)[i];
+            var current_node = (routing_table_json[origin])[packets[i].position_in_the_path];
+            var next_node = (routing_table_json[origin])[packets[i].position_in_the_path + 1];
+            var edge_id_1 = "#e-" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1] + "--" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1];
+            var edge_id_2 = "#e-" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1] + "--" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1];
+            if (cy.$(edge_id_1).inside()) {
+                // load_seen_by_packet += cy.$(edge_id_1).data().weight
+            } else if (cy.$(edge_id_2).inside()) {
+                // load_seen_by_packet += cy.$(edge_id_2).data().weight
+            } else console.log("ERROR finding edge");
             switch (packets[i].status) {
                 case "inside_a_node":
                     console.log("packet from " + Object.keys(routing_table_json)[i] + " is inside a node");
+                    console.log("going to " + next_node + " via the link " + edge_id_1);
                     break;
                 default:
                     console.log("ERROR DETERMINING STATUS OF PACKET");
                     break;
             }
         }
+        // finished processing packets
+        // now start processing links
+        cy.edges().forEach(function(link) {});
         console.log("FINISHED PROCESSING CYCLE #" + cycle);
     }
 }
