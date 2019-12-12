@@ -91,7 +91,10 @@ function initialize_network() {
                             "weight": 1,
                             "source": "n-" + i + "-" + j,
                             "target": "n-" + i + "-" + (j + 1),
-                            "label": nodes_original[j * COLS + i].south
+                            "label": nodes_original[j * COLS + i].south,
+                            "number_of_packets_processing": 0,
+                            "packets_about_to_be_processed": [],
+                            "packets_current_processing": []
                         },
                         "position": {},
                         "group": "edges",
@@ -100,10 +103,7 @@ function initialize_network() {
                         "selectable": true,
                         "locked": true,
                         "grabbable": true,
-                        "classes": "outline",
-                        "number_of_packets_processing": 0,
-                        "packets_about_to_be_processed": [],
-                        "packets_current_processing": []
+                        "classes": "outline"
                     });
                 } else // if the element is  at the last row -- wrap around to the 0th row
                 {
@@ -113,7 +113,10 @@ function initialize_network() {
                             "weight": 1,
                             "source": "n-" + i + "-" + j,
                             "target": "n-" + i + "-" + 0,
-                            "label": nodes_original[j * COLS + i].south
+                            "label": nodes_original[j * COLS + i].south,
+                            "number_of_packets_processing": 0,
+                            "packets_about_to_be_processed": [],
+                            "packets_current_processing": []
                         },
                         "position": {},
                         "group": "edges",
@@ -122,10 +125,7 @@ function initialize_network() {
                         "selectable": true,
                         "locked": true,
                         "grabbable": true,
-                        "classes": "outline unbundled-bezier",
-                        "number_of_packets_processing": 0,
-                        "packets_about_to_be_processed": [],
-                        "packets_current_processing": []
+                        "classes": "outline unbundled-bezier"
                     });
                 }
                 if (i != COLS - 1) { // if the element is not at the last row
@@ -135,7 +135,10 @@ function initialize_network() {
                             "weight": 1,
                             "source": "n-" + i + "-" + j,
                             "target": "n-" + (i + 1) + "-" + j,
-                            "label": nodes_original[j * COLS + i].east
+                            "label": nodes_original[j * COLS + i].east,
+                            "number_of_packets_processing": 0,
+                            "packets_about_to_be_processed": [],
+                            "packets_current_processing": []
                         },
                         "position": {},
                         "group": "edges",
@@ -144,10 +147,7 @@ function initialize_network() {
                         "selectable": true,
                         "locked": true,
                         "grabbable": true,
-                        "classes": "outline",
-                        "number_of_packets_processing": 0,
-                        "packets_about_to_be_processed": [],
-                        "packets_current_processing": []
+                        "classes": "outline"
                     });
                 } else { // if the element is at the last row -- wrap around
                     data.push({
@@ -156,7 +156,10 @@ function initialize_network() {
                             "weight": 1,
                             "source": "n-" + i + "-" + j,
                             "target": "n-" + 0 + "-" + j,
-                            "label": nodes_original[j * COLS + i].east
+                            "label": nodes_original[j * COLS + i].east,
+                            "number_of_packets_processing": 0,
+                            "packets_about_to_be_processed": [],
+                            "packets_current_processing": []
                         },
                         "position": {},
                         "group": "edges",
@@ -165,10 +168,7 @@ function initialize_network() {
                         "selectable": true,
                         "locked": true,
                         "grabbable": true,
-                        "classes": "outline unbundled-bezier",
-                        "number_of_packets_processing": 0,
-                        "packets_about_to_be_processed": [],
-                        "packets_current_processing": []
+                        "classes": "outline unbundled-bezier"
                     });
                 }
             }
@@ -343,20 +343,28 @@ function simulate_routing_table(routing_table_json, number_of_cycles) {
             var origin = Object.keys(routing_table_json)[i];
             var current_node = (routing_table_json[origin])[packets[i].position_in_the_path];
             var next_node = (routing_table_json[origin])[packets[i].position_in_the_path + 1];
-            var edge_id_1 = "#e-" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1] + "--" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1];
-            var edge_id_2 = "#e-" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1] + "--" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1];
-            if (cy.$(edge_id_1).inside()) {
-                // load_seen_by_packet += cy.$(edge_id_1).data().weight
-            } else if (cy.$(edge_id_2).inside()) {
-                // load_seen_by_packet += cy.$(edge_id_2).data().weight
-            } else console.log("ERROR finding edge");
             switch (packets[i].status) {
                 case "inside_a_node":
                     console.log("packet from " + Object.keys(routing_table_json)[i] + " is inside a node");
-                    console.log("going to " + next_node + " via the link " + edge_id_1);
+                    // not sure what the link is called
+                    var edge_id_1 = "#e-" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1] + "--" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1];
+                    var edge_id_2 = "#e-" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1] + "--" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1];
+                    // now we found the exact name of the link
+                    // add the packet to the packets_about_to_be_processed array
+                    if (cy.$(edge_id_1).inside()) {
+                        console.log("going to " + next_node + " via the link " + edge_id_1);
+                        cy.$(edge_id_1).data().packets_about_to_be_processed.push(i)
+                        console.log(cy.$(edge_id_1).data().packets_about_to_be_processed);
+                    } else if (cy.$(edge_id_2).inside()) {
+                        console.log("going to " + next_node + " via the link " + edge_id_2);
+                        cy.$(edge_id_2).data().packets_about_to_be_processed.push(i)
+                        console.log(cy.$(edge_id_2).data().packets_about_to_be_processed);
+                    } else console.log("ERROR finding edge");
+                    packets[i].going_from = current_node;
+                    packets[i].going_to = next_node;
                     break;
                 default:
-                    console.log("ERROR DETERMINING STATUS OF PACKET");
+                    alert("STOPPING ");
                     break;
             }
         }
