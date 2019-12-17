@@ -420,6 +420,7 @@ function simulate_routing_table(routing_table_json, number_of_periods, number_of
     for (var i = 0; i < packets.length; i++) {}
     // core simulation
     for (var preriod = 0; preriod < number_of_periods; preriod++) {
+        console.log("STARTING PROCESSING PERIOD #" + preriod);
         //reset packets
         for (var i = 0; i < packets.length; i++) {
             packets[i].link_packet_is_in = "";
@@ -433,7 +434,7 @@ function simulate_routing_table(routing_table_json, number_of_periods, number_of
             packets[i].path = routing_table_json[Object.keys(routing_table_json)[i]];
         }
         for (var cycle = 0; cycle < number_of_cycles_per_period; cycle++) {
-            console.log("STARTING PROCESSING CYCLE #" + cycle);
+            // console.log("STARTING PROCESSING CYCLE #" + cycle);
             for (var i = 0; i < packets.length; i++) {
                 // var current_path;
                 // for (var node in routing_table_json) {
@@ -445,7 +446,7 @@ function simulate_routing_table(routing_table_json, number_of_periods, number_of
                 switch (packets[i].status) {
                     case "inside_a_node":
                         if (packets[i].current_node == "#n-0-0") {
-                            console.log("packet from " + packets[i].origin + " has reached the Master");
+                            // console.log("packet from " + packets[i].origin + " has reached the Master");
                             packets[i].status = "has_reached_master";
                             packets[i].latencies_over_periods.push(packets[i].latency);
                             packets[i].latency = 0;
