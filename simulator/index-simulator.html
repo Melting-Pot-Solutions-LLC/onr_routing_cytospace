@@ -27,33 +27,25 @@
             <div class="row">
                 <div class="col-lg-6">
                     <div class="input-group">
-                        <input type="number" class="form-control" placeholder="Rows" id="rows">
+                        <input type="number" class="form-control" placeholder="Number of periods" id="rows">
                         <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" id="update_rows">Update!</button>
-                        </span>
-                    </div><!-- /input-group -->
-                </div><!-- /.col-lg-6 -->
-                <div class="col-lg-6">
-                    <div class="input-group">
-                        <input type="number" class="form-control" placeholder="Columns" id="cols">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" id="update_cols">Update!</button>
+                            <button class="btn btn-default" type="button" id="simulate">Simulate!</button>
                         </span>
                     </div><!-- /input-group -->
                 </div><!-- /.col-lg-6 -->
             </div><!-- /.row -->
         </div>
-        <div class="container">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
-                </div>
-                <div class="custom-file">
-                    <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01" accept="text/plain">
-                    <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
-                </div>
-            </div>
+        <!-- <div class="container">
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
         </div>
+        <div class="custom-file">
+            <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01" accept="text/plain">
+            <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+        </div>
+    </div>
+</div> -->
         <div class="container">
             <div id="cy"></div>
             <!-- Load application code at the end to ensure DOM is loaded -->
@@ -64,7 +56,11 @@
     $(document).ready(function() {
         var cols = 6;
         var rows = 12;
-    })
+    });
+    $("#simulate").click(function() {
+        number_of_periods = $("#rows").val();
+        simulate_routing_table(new_routing_tabe, number_of_periods, 400);
+    });
     </script>
 
 </html>

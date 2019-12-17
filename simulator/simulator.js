@@ -10,6 +10,79 @@ var LINK_TRANSMISSION_DELAY_CYCLES = 35;
 var CYCLE_FREQUENCY_TO_SYNCHRONIZE_CHANNELS = 16;
 var NODE_PACKET_PROCESSING_DELAY = 0;
 var current_cycle = 0;
+var routing_table_from_json_file = {
+    "#n-3-2": "#n-3-2,#n-2-2,#n-2-1,#n-1-1,#n-0-1,#n-0-0",
+    "#n-3-3": "#n-3-3,#n-3-2,#n-3-1,#n-3-0,#n-2-0,#n-1-0,#n-0-0",
+    "#n-3-0": "#n-3-0,#n-2-0,#n-1-0,#n-0-0",
+    "#n-3-1": "#n-3-1,#n-4-1,#n-5-1,#n-5-0,#n-0-0",
+    "#n-3-6": "#n-3-6,#n-3-7,#n-2-7,#n-2-8,#n-2-9,#n-2-10,#n-2-11,#n-2-0,#n-1-0,#n-0-0",
+    "#n-3-7": "#n-3-7,#n-3-8,#n-3-9,#n-3-10,#n-3-11,#n-4-11,#n-4-0,#n-5-0,#n-0-0",
+    "#n-3-4": "#n-3-4,#n-4-4,#n-4-3,#n-5-3,#n-5-2,#n-5-1,#n-0-1,#n-0-0",
+    "#n-3-5": "#n-3-5,#n-3-4,#n-2-4,#n-2-3,#n-1-3,#n-0-3,#n-0-2,#n-0-1,#n-0-0",
+    "#n-3-8": "#n-3-8,#n-4-8,#n-4-9,#n-4-10,#n-5-10,#n-0-10,#n-0-11,#n-0-0",
+    "#n-3-9": "#n-3-9,#n-4-9,#n-4-10,#n-5-10,#n-5-11,#n-5-0,#n-0-0",
+    "#n-5-8": "#n-5-8,#n-5-9,#n-5-10,#n-5-11,#n-5-0,#n-0-0",
+    "#n-5-9": "#n-5-9,#n-5-10,#n-5-11,#n-0-11,#n-0-0",
+    "#n-4-9": "#n-4-9,#n-4-10,#n-5-10,#n-5-11,#n-5-0,#n-0-0",
+    "#n-4-8": "#n-4-8,#n-5-8,#n-5-9,#n-5-10,#n-0-10,#n-0-11,#n-0-0",
+    "#n-4-4": "#n-4-4,#n-4-3,#n-4-2,#n-5-2,#n-5-1,#n-5-0,#n-0-0",
+    "#n-5-0": "#n-5-0,#n-0-0",
+    "#n-5-1": "#n-5-1,#n-5-0,#n-0-0",
+    "#n-5-2": "#n-5-2,#n-0-2,#n-0-1,#n-0-0",
+    "#n-5-3": "#n-5-3,#n-5-2,#n-0-2,#n-0-1,#n-0-0",
+    "#n-4-1": "#n-4-1,#n-5-1,#n-5-0,#n-0-0",
+    "#n-4-0": "#n-4-0,#n-5-0,#n-0-0",
+    "#n-4-3": "#n-4-3,#n-4-2,#n-4-1,#n-4-0,#n-5-0,#n-0-0",
+    "#n-4-2": "#n-4-2,#n-4-1,#n-4-0,#n-5-0,#n-0-0",
+    "#n-4-6": "#n-4-6,#n-4-5,#n-4-4,#n-4-3,#n-5-3,#n-5-2,#n-0-2,#n-0-1,#n-0-0",
+    "#n-5-4": "#n-5-4,#n-5-3,#n-5-2,#n-0-2,#n-0-1,#n-0-0",
+    "#n-5-10": "#n-5-10,#n-5-11,#n-0-11,#n-0-0",
+    "#n-5-11": "#n-5-11,#n-0-11,#n-0-0",
+    "#n-0-11": "#n-0-11,#n-0-0",
+    "#n-0-10": "#n-0-10,#n-0-11,#n-0-0",
+    "#n-0-4": "#n-0-4,#n-0-3,#n-0-2,#n-0-1,#n-0-0",
+    "#n-2-1": "#n-2-1,#n-2-0,#n-1-0,#n-0-0",
+    "#n-5-7": "#n-5-7,#n-5-8,#n-5-9,#n-5-10,#n-5-11,#n-0-11,#n-0-0",
+    "#n-1-10": "#n-1-10,#n-1-11,#n-1-0,#n-0-0",
+    "#n-1-11": "#n-1-11,#n-1-0,#n-0-0",
+    "#n-1-4": "#n-1-4,#n-1-3,#n-0-3,#n-0-2,#n-0-1,#n-0-0",
+    "#n-1-5": "#n-1-5,#n-1-4,#n-1-3,#n-1-2,#n-1-1,#n-1-0,#n-0-0",
+    "#n-1-6": "#n-1-6,#n-1-5,#n-1-4,#n-1-3,#n-1-2,#n-1-1,#n-0-1,#n-0-0",
+    "#n-1-7": "#n-1-7,#n-1-8,#n-1-9,#n-1-10,#n-1-11,#n-1-0,#n-0-0",
+    "#n-1-0": "#n-1-0,#n-0-0",
+    "#n-1-1": "#n-1-1,#n-1-0,#n-0-0",
+    "#n-1-2": "#n-1-2,#n-1-1,#n-1-0,#n-0-0",
+    "#n-1-3": "#n-1-3,#n-1-2,#n-1-1,#n-1-0,#n-0-0",
+    "#n-3-11": "#n-3-11,#n-4-11,#n-5-11,#n-5-0,#n-0-0",
+    "#n-4-7": "#n-4-7,#n-5-7,#n-5-8,#n-0-8,#n-0-9,#n-0-10,#n-0-11,#n-0-0",
+    "#n-1-8": "#n-1-8,#n-1-9,#n-1-10,#n-1-11,#n-0-11,#n-0-0",
+    "#n-1-9": "#n-1-9,#n-1-10,#n-1-11,#n-1-0,#n-0-0",
+    "#n-0-9": "#n-0-9,#n-0-10,#n-0-11,#n-0-0",
+    "#n-0-8": "#n-0-8,#n-0-9,#n-0-10,#n-0-11,#n-0-0",
+    "#n-4-11": "#n-4-11,#n-4-0,#n-5-0,#n-0-0",
+    "#n-2-9": "#n-2-9,#n-2-10,#n-2-11,#n-2-0,#n-1-0,#n-0-0",
+    "#n-2-8": "#n-2-8,#n-2-9,#n-2-10,#n-2-11,#n-1-11,#n-0-11,#n-0-0",
+    "#n-0-1": "#n-0-1,#n-0-0",
+    "#n-2-6": "#n-2-6,#n-2-7,#n-2-8,#n-2-9,#n-2-10,#n-2-11,#n-1-11,#n-0-11,#n-0-0",
+    "#n-2-5": "#n-2-5,#n-2-4,#n-2-3,#n-1-3,#n-1-2,#n-0-2,#n-0-1,#n-0-0",
+    "#n-2-4": "#n-2-4,#n-2-3,#n-2-2,#n-2-1,#n-2-0,#n-1-0,#n-0-0",
+    "#n-0-5": "#n-0-5,#n-0-4,#n-0-3,#n-0-2,#n-0-1,#n-0-0",
+    "#n-2-2": "#n-2-2,#n-2-1,#n-2-0,#n-1-0,#n-0-0",
+    "#n-0-7": "#n-0-7,#n-0-8,#n-0-9,#n-0-10,#n-0-11,#n-0-0",
+    "#n-2-0": "#n-2-0,#n-1-0,#n-0-0",
+    "#n-0-3": "#n-0-3,#n-0-2,#n-0-1,#n-0-0",
+    "#n-5-6": "#n-5-6,#n-5-7,#n-5-8,#n-5-9,#n-5-10,#n-5-11,#n-0-11,#n-0-0",
+    "#n-2-3": "#n-2-3,#n-1-3,#n-0-3,#n-0-2,#n-0-1,#n-0-0",
+    "#n-4-5": "#n-4-5,#n-4-4,#n-4-3,#n-4-2,#n-4-1,#n-5-1,#n-5-0,#n-0-0",
+    "#n-2-7": "#n-2-7,#n-2-8,#n-2-9,#n-1-9,#n-1-10,#n-1-11,#n-0-11,#n-0-0",
+    "#n-0-2": "#n-0-2,#n-0-1,#n-0-0",
+    "#n-3-10": "#n-3-10,#n-4-10,#n-5-10,#n-5-11,#n-5-0,#n-0-0",
+    "#n-4-10": "#n-4-10,#n-5-10,#n-5-11,#n-5-0,#n-0-0",
+    "#n-2-10": "#n-2-10,#n-1-10,#n-0-10,#n-0-11,#n-0-0",
+    "#n-5-5": "#n-5-5,#n-5-4,#n-5-3,#n-5-2,#n-0-2,#n-0-1,#n-0-0",
+    "#n-2-11": "#n-2-11,#n-1-11,#n-0-11,#n-0-0",
+    "#n-0-6": "#n-0-6,#n-0-7,#n-0-8,#n-0-9,#n-0-10,#n-0-11,#n-0-0"
+}
 
 function getRandomLinkDelay() {
     return 35;
@@ -260,47 +333,52 @@ function initialize_network() {
 //     FILE READING ROUTINES
 //
 //---------------------
-var reader = new FileReader();
-document.querySelector("#inputGroupFile01").addEventListener('change', function() {
-    // list of selected files
-    var all_files = this.files;
-    if (all_files.length == 0) {
-        alert('Error : No file selected');
-        return;
-    }
-    // first file selected by user
-    var file = all_files[0];
-    // files types allowed
-    // we are reading text file in this example
-    // var allowed_types = ['text/plain'];
-    // if (allowed_types.indexOf(file.type) == -1) {
-    //     alert('Error : Incorrect file type');
-    //     return;
-    // }
-    // Max 2 MB allowed
-    var max_size_allowed = 2 * 1024 * 1024
-    if (file.size > max_size_allowed) {
-        alert('Error : Exceeded size 2MB');
-        return;
-    }
-    // file validation is successful
-    // we will now read the file
-    reader.readAsText(file);
-});
-reader.addEventListener('load', function(e) {
-    // contents
-    var text = e.target.result;
-    // parse as JSON
-    var json_str = JSON.parse(text);
-    // console.log(json_str);
-    console.log("FOUND " + countObjectsInJSON(json_str) + " PATHS IN THE ROUTING TABLE");
-    new_routing_tabe = {};
-    for (var node in json_str) {
-        new_routing_tabe[node] = json_str[node].split(",");
-    }
-    // console.log(new_routing_tabe);
-    simulate_routing_table(new_routing_tabe, 5, 400);
-});
+new_routing_tabe = {};
+for (var node in routing_table_from_json_file) {
+    new_routing_tabe[node] = routing_table_from_json_file[node].split(",");
+}
+simulate_routing_table(new_routing_tabe, 5, 400);
+// var reader = new FileReader();
+// document.querySelector("#inputGroupFile01").addEventListener('change', function() {
+//     // list of selected files
+//     var all_files = this.files;
+//     if (all_files.length == 0) {
+//         alert('Error : No file selected');
+//         return;
+//     }
+//     // first file selected by user
+//     var file = all_files[0];
+//     // files types allowed
+//     // we are reading text file in this example
+//     // var allowed_types = ['text/plain'];
+//     // if (allowed_types.indexOf(file.type) == -1) {
+//     //     alert('Error : Incorrect file type');
+//     //     return;
+//     // }
+//     // Max 2 MB allowed
+//     var max_size_allowed = 2 * 1024 * 1024
+//     if (file.size > max_size_allowed) {
+//         alert('Error : Exceeded size 2MB');
+//         return;
+//     }
+//     // file validation is successful
+//     // we will now read the file
+//     reader.readAsText(file);
+// });
+// reader.addEventListener('load', function(e) {
+//     // contents
+//     var text = e.target.result;
+//     // parse as JSON
+//     var json_str = JSON.parse(text);
+//     // console.log(json_str);
+//     console.log("FOUND " + countObjectsInJSON(json_str) + " PATHS IN THE ROUTING TABLE");
+//     new_routing_tabe = {};
+//     for (var node in json_str) {
+//         new_routing_tabe[node] = json_str[node].split(",");
+//     }
+//     // console.log(new_routing_tabe);
+//     simulate_routing_table(new_routing_tabe, 10, 400);
+// });
 //
 //
 //
@@ -315,7 +393,7 @@ reader.addEventListener('load', function(e) {
 //
 //---------------------
 function simulate_routing_table(routing_table_json, number_of_periods, number_of_cycles_per_period) {
-    console.log("SIMULATING the following routing table");
+    // console.log("SIMULATING the following routing table");
     console.log(routing_table_json);
     for (var node in routing_table_json) {
         path = routing_table_json[node];
@@ -452,7 +530,7 @@ function simulate_routing_table(routing_table_json, number_of_periods, number_of
                 link.json({ "data": { "packets_about_to_be_processed": packets_about_to_be_processed } });
                 link.json({ "data": { "packets_current_processing_counters": packets_current_processing_counters } });
             });
-            console.log("FINISHED PROCESSING CYCLE #" + cycle);
+            // console.log("FINISHED PROCESSING CYCLE #" + cycle);
             // console.log("PACKETS");
             // console.log(packets);
             if (is_period_completed(packets)) {
