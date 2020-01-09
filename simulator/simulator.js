@@ -123,6 +123,35 @@ function get_random_link_transmission_delay()
  
 }
 
+function gaussian(mean, stdev) 
+{
+    var y2;
+    var use_last = false;
+    // return function() {
+        var y1;
+        if(use_last) {
+           y1 = y2;
+           use_last = false;
+        }
+        else {
+            var x1, x2, w;
+            do {
+                 x1 = 2.0 * Math.random() - 1.0;
+                 x2 = 2.0 * Math.random() - 1.0;
+                 w  = x1 * x1 + x2 * x2;               
+            } while( w >= 1.0);
+            w = Math.sqrt((-2.0 * Math.log(w))/w);
+            y1 = x1 * w;
+            y2 = x2 * w;
+            use_last = true;
+       }
+
+       var retval = mean + stdev * y1;
+       if(retval > 0) 
+           return retval;
+       return -retval;
+   // }
+}
 
 function initialize_network() {
     var data = [];
@@ -349,7 +378,8 @@ new_routing_tabe = {};
 for (var node in routing_table_from_json_file) {
     new_routing_tabe[node] = routing_table_from_json_file[node].split(",");
 }
-simulate_routing_table(new_routing_tabe, 10, 1000);
+// simulate_routing_table_with_synchronized_periods(new_routing_tabe, 5, 400);
+simulate_routing_table_based_only_on_cycles(new_routing_tabe, 4000, 400);
 // var reader = new FileReader();
 // document.querySelector("#inputGroupFile01").addEventListener('change', function() {
 //     // list of selected files
@@ -404,7 +434,7 @@ simulate_routing_table(new_routing_tabe, 10, 1000);
 //     CORE CODE
 //
 //---------------------
-function simulate_routing_table(routing_table_json, number_of_periods, number_of_cycles_per_period) {
+function simulate_routing_table_with_synchronized_periods(routing_table_json, number_of_periods, number_of_cycles_per_period) {
     // console.log("SIMULATING the following routing table");
     console.log(routing_table_json);
     for (var node in routing_table_json) {
@@ -422,17 +452,27 @@ function simulate_routing_table(routing_table_json, number_of_periods, number_of
         this.path = "";
         this.latency = 0;
         this.latencies_over_periods = [];
+        this.period = Math.round(gaussian(number_of_cycles_per_period, number_of_cycles_per_period_std_dev));
     }
     initialize_network()
     var packets = new Array();
+    var packets_periods = new Array();
+    var number_of_cycles_per_period_std_dev = number_of_cycles_per_period*0.033;
     for (var k = 0; k < COLS * ROWS - 1; k++) {
         packets.push(new packet());
+        packets_periods.push(Math.round(gaussian(number_of_cycles_per_period, number_of_cycles_per_period_std_dev)));
     }
+    // console.log(packets_periods);
+    // exit();
+    // console.log(initial_packets_delays);
     // initialize packets
     for (var i = 0; i < packets.length; i++) {}
     // core simulation
     for (var preriod = 0; preriod < number_of_periods; preriod++) {
         console.log("STARTING PROCESSING PERIOD #" + preriod);
+        // creating a copy of delays array which we are going to decrement
+
+        var packets_periods_copy = packets_periods.slice();
         //reset packets
         for (var i = 0; i < packets.length; i++) {
             packets[i].link_packet_is_in = "";
@@ -448,58 +488,78 @@ function simulate_routing_table(routing_table_json, number_of_periods, number_of
         for (var cycle = 0; cycle < number_of_cycles_per_period; cycle++) {
             // console.log("STARTING PROCESSING CYCLE #" + cycle);
             for (var i = 0; i < packets.length; i++) {
-                // var current_path;
-                // for (var node in routing_table_json) {
-                //     current_path = routing_table_json[node]
+                // if(cycle > 0 && cycle % packets_periods[i] == 0)
+                // {
+                //     if(packets[i].status == "has_reached_master")
+                //     {
+                //         packets[i].link_packet_is_in = "";
+                //         packets[i].position_in_the_path = 0;
+                //         packets[i].going_from = "";
+                //         packets[i].going_to = "";
+                //         packets[i].latency = 0;
+                //         packets[i].origin = Object.keys(routing_table_json)[i];
+                //         packets[i].current_node = Object.keys(routing_table_json)[i];
+                //         packets[i].status = "inside_a_node";
+                //         packets[i].path = routing_table_json[Object.keys(routing_table_json)[i]];
+                //     }
+                //     else
+                //     {
+                //         console.log("ERROR: attempting to send a packet when it was not received yet from the previous period");
+                //     }
                 // }
+                
                 var origin = Object.keys(routing_table_json)[i];
                 var current_node = (routing_table_json[origin])[packets[i].position_in_the_path];
                 // console.log(current_node);
                 var next_node = (routing_table_json[origin])[packets[i].position_in_the_path + 1];
-                switch (packets[i].status) {
-                    case "inside_a_node":
-                        if (packets[i].current_node == "#n-0-0") {
-                            // console.log("packet from " + packets[i].origin + " has reached the Master");
-                            packets[i].status = "has_reached_master";
-                            packets[i].latencies_over_periods.push(packets[i].latency);
-                            packets[i].latency = 0;
+                
+                
+                    switch (packets[i].status) {
+                        case "inside_a_node":
+                            if (packets[i].current_node == "#n-0-0") {
+                                // console.log("packet from " + packets[i].origin + " has reached the Master");
+                                packets[i].status = "has_reached_master";
+                                packets[i].latencies_over_periods.push(packets[i].latency);
+                                packets[i].latency = 0;
+                                break;
+                            }
+                            packets[i].latency++;
+                            // console.log("packet from " + Object.keys(routing_table_json)[i] + " is inside a node " + packets[i].current_node);
+                            // not sure what the link is called
+                            var edge_id_1 = "#e-" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1] + "--" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1];
+                            var edge_id_2 = "#e-" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1] + "--" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1];
+                            // now we found the exact name of the link
+                            // add the packet to the packets_about_to_be_processed array
+                            if (cy.$(edge_id_1).inside()) {
+                                // console.log("going to " + next_node + " via the link " + edge_id_1);
+                                cy.$(edge_id_1).data().packets_about_to_be_processed.push(i)
+                                // cy.$(edge_id_1).data().packets_current_processing_counter.push(LINK_TRANSMISSION_DELAY_CYCLES);
+                                // console.log(cy.$(edge_id_1).data().packets_about_to_be_processed);
+                            } else if (cy.$(edge_id_2).inside()) {
+                                // console.log("going to " + next_node + " via the link " + edge_id_2);
+                                cy.$(edge_id_2).data().packets_about_to_be_processed.push(i);
+                                // cy.$(edge_id_2).data().packets_current_processing_counter.push(LINK_TRANSMISSION_DELAY_CYCLES);
+                                // console.log(cy.$(edge_id_2).data().packets_about_to_be_processed);
+                            } else console.log("ERROR finding edge");
+                            packets[i].going_from = current_node;
+                            packets[i].going_to = next_node;
+                            packets[i].status = "inside_a_link";
+                            packets[i].current_node = "";
                             break;
-                        }
-                        packets[i].latency++;
-                        // console.log("packet from " + Object.keys(routing_table_json)[i] + " is inside a node " + packets[i].current_node);
-                        // not sure what the link is called
-                        var edge_id_1 = "#e-" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1] + "--" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1];
-                        var edge_id_2 = "#e-" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1] + "--" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1];
-                        // now we found the exact name of the link
-                        // add the packet to the packets_about_to_be_processed array
-                        if (cy.$(edge_id_1).inside()) {
-                            // console.log("going to " + next_node + " via the link " + edge_id_1);
-                            cy.$(edge_id_1).data().packets_about_to_be_processed.push(i)
-                            // cy.$(edge_id_1).data().packets_current_processing_counter.push(LINK_TRANSMISSION_DELAY_CYCLES);
-                            // console.log(cy.$(edge_id_1).data().packets_about_to_be_processed);
-                        } else if (cy.$(edge_id_2).inside()) {
-                            // console.log("going to " + next_node + " via the link " + edge_id_2);
-                            cy.$(edge_id_2).data().packets_about_to_be_processed.push(i);
-                            // cy.$(edge_id_2).data().packets_current_processing_counter.push(LINK_TRANSMISSION_DELAY_CYCLES);
-                            // console.log(cy.$(edge_id_2).data().packets_about_to_be_processed);
-                        } else console.log("ERROR finding edge");
-                        packets[i].going_from = current_node;
-                        packets[i].going_to = next_node;
-                        packets[i].status = "inside_a_link";
-                        packets[i].current_node = "";
-                        break;
-                    case "has_reached_master":
-                        packets[i].latency++;
-                        break;
-                    case "inside_a_link":
-                        packets[i].latency++;
-                        break;
-                    default:
-                        alert("STOPPING ");
-                        break;
-                }
+                        case "has_reached_master":
+                            packets[i].latency++;
+                            break;
+                        case "inside_a_link":
+                            packets[i].latency++;
+                            break;
+                        default:
+                            alert("STOPPING ");
+                            break;
+                    }
+                
+
             }
-            // finished processing packets
+            // finished processing packets for this cycle
             // now start processing links
             // on every 8th cycle all the links idle
             if (cycle%8 != 0) {
@@ -570,6 +630,223 @@ function simulate_routing_table(routing_table_json, number_of_periods, number_of
             console.log("ERROR SIMULATING A PERIOD #" + preriod);
         }
     }
+    // display status of the network
+    console.log("\n\nDISPLAYING THE NETWORK");
+    console.log(packets);
+}
+
+
+
+
+//---------------------
+//
+//     This function simulates clock drift - each packet has its own period
+//     and it starts as soon as the previous one finishes, not waiting
+//     on other packets
+//
+//---------------------
+
+
+function simulate_routing_table_based_only_on_cycles(routing_table_json, number_of_total_cycles, number_of_cycles_per_period) {
+    // console.log("SIMULATING the following routing table");
+    console.log(routing_table_json);
+    for (var node in routing_table_json) {
+        path = routing_table_json[node];
+    }
+
+    var number_of_cycles_per_period_std_dev = number_of_cycles_per_period*0.033;
+
+    function packet() {
+        this.origin = "";
+        this.status = "inside_a_node";
+        this.link_packet_is_in = "";
+        this.current_node = "";
+        this.position_in_the_path = 0;
+        this.going_from = "";
+        this.going_to = "";
+        this.path = "";
+        this.latency = 0;
+        this.latencies_over_periods = [];
+        this.period = Math.round(gaussian(number_of_cycles_per_period, number_of_cycles_per_period_std_dev));
+    }
+    initialize_network()
+    var packets = new Array();
+    // var packets_periods = new Array();
+    
+    for (var k = 0; k < COLS * ROWS - 1; k++) {
+        packets.push(new packet());
+        // packets_periods.push(Math.round(gaussian(number_of_cycles_per_period, number_of_cycles_per_period_std_dev)));
+    }
+    // console.log(packets_periods);
+    // exit();
+    // console.log(initial_packets_delays);
+    // initialize packets
+    for (var i = 0; i < packets.length; i++) {}
+    // core simulation
+    // for (var preriod = 0; preriod < number_of_periods; preriod++) {
+        // console.log("STARTING PROCESSING PERIOD #" + preriod);
+        // creating a copy of delays array which we are going to decrement
+
+        // var packets_periods_copy = packets_periods.slice();
+        //reset packets
+        for (var i = 0; i < packets.length; i++) {
+            packets[i].link_packet_is_in = "";
+            packets[i].position_in_the_path = 0;
+            packets[i].going_from = "";
+            packets[i].going_to = "";
+            packets[i].latency = 0;
+            packets[i].origin = Object.keys(routing_table_json)[i];
+            packets[i].current_node = Object.keys(routing_table_json)[i];
+            packets[i].status = "inside_a_node";
+            packets[i].path = routing_table_json[Object.keys(routing_table_json)[i]];
+        }
+        for (var cycle = 0; cycle < number_of_total_cycles; cycle++) {
+            // console.log("STARTING PROCESSING CYCLE #" + cycle);
+            for (var i = 0; i < packets.length; i++) {
+                if(cycle > 0 && cycle % packets[i].period == 0)
+                {
+                    if(packets[i].status == "has_reached_master")
+                    {
+                        if(i == 10)
+                        console.log("packet " + i + " starts a new peiod");
+                        packets[i].link_packet_is_in = "";
+                        packets[i].position_in_the_path = 0;
+                        packets[i].going_from = "";
+                        packets[i].going_to = "";
+                        packets[i].latency = 0;
+                        packets[i].origin = Object.keys(routing_table_json)[i];
+                        packets[i].current_node = Object.keys(routing_table_json)[i];
+                        packets[i].status = "inside_a_node";
+                        packets[i].path = routing_table_json[Object.keys(routing_table_json)[i]];
+                    }
+                    else
+                    {
+                        console.log("ERROR: attempting to send a packet when it was not received yet from the previous period");
+                    }
+                }
+                
+                var origin = Object.keys(routing_table_json)[i];
+                var current_node = (routing_table_json[origin])[packets[i].position_in_the_path];
+                // console.log(current_node);
+                var next_node = (routing_table_json[origin])[packets[i].position_in_the_path + 1];
+                
+                
+                    switch (packets[i].status) {
+                        case "inside_a_node":
+                            if (packets[i].current_node == "#n-0-0") {
+                                // console.log("packet from " + packets[i].origin + " has reached the Master");
+                                packets[i].status = "has_reached_master";
+                                packets[i].latencies_over_periods.push(packets[i].latency);
+                                packets[i].latency = 0;
+                                break;
+                            }
+                            packets[i].latency++;
+                            // console.log("packet from " + Object.keys(routing_table_json)[i] + " is inside a node " + packets[i].current_node);
+                            // not sure what the link is called
+                            var edge_id_1 = "#e-" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1] + "--" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1];
+                            var edge_id_2 = "#e-" + extract_i_j_from_id(next_node)[0] + "-" + extract_i_j_from_id(next_node)[1] + "--" + extract_i_j_from_id(current_node)[0] + "-" + extract_i_j_from_id(current_node)[1];
+                            // now we found the exact name of the link
+                            // add the packet to the packets_about_to_be_processed array
+                            if (cy.$(edge_id_1).inside()) {
+                                // console.log("going to " + next_node + " via the link " + edge_id_1);
+                                cy.$(edge_id_1).data().packets_about_to_be_processed.push(i)
+                                // cy.$(edge_id_1).data().packets_current_processing_counter.push(LINK_TRANSMISSION_DELAY_CYCLES);
+                                // console.log(cy.$(edge_id_1).data().packets_about_to_be_processed);
+                            } else if (cy.$(edge_id_2).inside()) {
+                                // console.log("going to " + next_node + " via the link " + edge_id_2);
+                                cy.$(edge_id_2).data().packets_about_to_be_processed.push(i);
+                                // cy.$(edge_id_2).data().packets_current_processing_counter.push(LINK_TRANSMISSION_DELAY_CYCLES);
+                                // console.log(cy.$(edge_id_2).data().packets_about_to_be_processed);
+                            } else console.log("ERROR finding edge");
+                            packets[i].going_from = current_node;
+                            packets[i].going_to = next_node;
+                            packets[i].status = "inside_a_link";
+                            packets[i].current_node = "";
+                            break;
+                        case "has_reached_master":
+                            // packets[i].latency++;
+                            break;
+                        case "inside_a_link":
+                            packets[i].latency++;
+                            break;
+                        default:
+                            alert("STOPPING ");
+                            break;
+                    }
+                
+
+            }
+            // finished processing packets for this cycle
+            // now start processing links
+            // on every 8th cycle all the links idle
+            if (cycle%8 != 0) {
+                cy.edges().forEach(function(link) {
+
+                    // console.log("processing link " + link.data('id'));
+                    var packets_currently_processing = link.data('packets_current_processing');
+                    var packets_about_to_be_processed = link.data('packets_about_to_be_processed');
+                    var packets_current_processing_counters = link.data('packets_current_processing_counter');
+                    for (var i = 0; i < packets_currently_processing.length; i++) {
+                        packets_current_processing_counters[i]--;
+                        if (packets_current_processing_counters[i] == 0) {
+                            // releasing the packet to the next node
+                            packets[packets_currently_processing[i]].status = "inside_a_node";
+                            packets[packets_currently_processing[i]].link_packet_is_in = "";
+                            packets[packets_currently_processing[i]].current_node = packets[packets_currently_processing[i]].going_to;
+                            packets[packets_currently_processing[i]].going_from = "";
+                            packets[packets_currently_processing[i]].going_to = "";
+                            packets[packets_currently_processing[i]].position_in_the_path++;
+                            packets_current_processing_counters.splice(i, 1);
+                            packets_currently_processing.splice(i, 1);
+                        }
+                    }
+                    if (packets_about_to_be_processed.length == 0) {} else if (packets_about_to_be_processed.length == 1) {
+                        // start processing the packet in the link
+                        packets_currently_processing.push(packets_about_to_be_processed[0]);
+                        packets[packets_about_to_be_processed[0]].status = "inside_a_link";
+                        packets[packets_about_to_be_processed[0]].link_packet_is_in = link.data('id');
+                        var o = get_random_link_transmission_delay();
+                        // console.log(o);
+                        
+                        packets_current_processing_counters.push(o);
+                        packets_about_to_be_processed.shift();
+                    } else if (packets_about_to_be_processed.length > 1) {
+                        // collision - choose the packet with the lower index
+                        // var r_index = Math.floor(Math.random() * packets_about_to_be_processed.length);
+                        // var r = packets_about_to_be_processed[r_index];
+                        var r = Math.min(...packets_about_to_be_processed);
+                        var r_index = packets_about_to_be_processed.indexOf(r);
+
+                        packets_currently_processing.push(r);
+                        packets[r].status = "inside_a_link";
+                        packets[r].link_packet_is_in = link.data('id');
+                        var o = get_random_link_transmission_delay();
+                        // console.log(o + " + " + r);
+                        // console.log(packets_about_to_be_processed);
+                        packets_current_processing_counters.push(o);
+
+                        packets_about_to_be_processed.splice(r_index, 1); // delete the element
+                    } else {
+                        console.log("ERROR processing packets in the links");
+                        alert("STOPPING ");
+                    }
+                    link.json({ "data": { "packets_current_processing": packets_currently_processing } });
+                    link.json({ "data": { "packets_about_to_be_processed": packets_about_to_be_processed } });
+                    link.json({ "data": { "packets_current_processing_counter": packets_current_processing_counters } });
+                });
+            }
+            // console.log("FINISHED PROCESSING CYCLE #" + cycle);
+            // console.log("PACKETS");
+            // console.log(packets);
+            // if (is_period_completed(packets)) {
+            //     console.log("THE PERIOD IS COMPLETED WITHIN " + cycle + " CYCLES");
+            //     break;
+            // }
+        }
+        // if (!is_period_completed(packets)) {
+        //     console.log("ERROR SIMULATING A PERIOD #" + preriod);
+        // }
+    
     // display status of the network
     console.log("\n\nDISPLAYING THE NETWORK");
     console.log(packets);
