@@ -85,6 +85,13 @@ var routing_table_from_json_file = {
     "#n-0-6": "#n-0-6,#n-0-7,#n-0-8,#n-0-9,#n-0-10,#n-0-11,#n-0-0"
 }
 
+function stddev_of_an_array(array)
+{
+    const n = array.length;
+    const mean = array.reduce((a,b) => a+b)/n;
+    return Math.sqrt(array.map(x => Math.pow(x-mean,2)).reduce((a,b) => a+b)/n);
+}
+
 function getRandomLinkDelay() {
     return 35;
 }
@@ -379,7 +386,7 @@ for (var node in routing_table_from_json_file) {
     new_routing_tabe[node] = routing_table_from_json_file[node].split(",");
 }
 // simulate_routing_table_with_synchronized_periods(new_routing_tabe, 5, 400);
-simulate_routing_table_based_only_on_cycles(new_routing_tabe, 4000, 400);
+simulate_routing_table_based_only_on_cycles(new_routing_tabe, 24000, 800);
 // var reader = new FileReader();
 // document.querySelector("#inputGroupFile01").addEventListener('change', function() {
 //     // list of selected files
@@ -453,6 +460,7 @@ function simulate_routing_table_with_synchronized_periods(routing_table_json, nu
         this.latency = 0;
         this.latencies_over_periods = [];
         this.period = Math.round(gaussian(number_of_cycles_per_period, number_of_cycles_per_period_std_dev));
+
     }
     initialize_network()
     var packets = new Array();
@@ -667,7 +675,10 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
         this.path = "";
         this.latency = 0;
         this.latencies_over_periods = [];
-        this.period = Math.round(gaussian(number_of_cycles_per_period, number_of_cycles_per_period_std_dev));
+        this.periods = [];
+        // this.period = Math.round(gaussian(number_of_cycles_per_period, number_of_cycles_per_period_std_dev));
+        this.start_cycle_of_current_period = [];
+        this.stdev_of_latencies = 0;
     }
     initialize_network()
     var packets = new Array();
@@ -699,16 +710,22 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
             packets[i].current_node = Object.keys(routing_table_json)[i];
             packets[i].status = "inside_a_node";
             packets[i].path = routing_table_json[Object.keys(routing_table_json)[i]];
+            packets[i].start_cycle_of_current_period.push(0); 
+            packets[i].periods.push(Math.round(gaussian(number_of_cycles_per_period, number_of_cycles_per_period_std_dev)));
         }
         for (var cycle = 0; cycle < number_of_total_cycles; cycle++) {
             // console.log("STARTING PROCESSING CYCLE #" + cycle);
             for (var i = 0; i < packets.length; i++) {
-                if(cycle > 0 && cycle % packets[i].period == 0)
+                if(cycle > 0 && cycle == packets[i].periods[packets[i].periods.length-1] + packets[i].start_cycle_of_current_period[packets[i].start_cycle_of_current_period.length-1])
                 {
+                    // create a new number for the period
+                    packets[i].periods.push(Math.round(gaussian(number_of_cycles_per_period, number_of_cycles_per_period_std_dev)));
+                    packets[i].start_cycle_of_current_period.push(cycle);
+
                     if(packets[i].status == "has_reached_master")
                     {
                         if(i == 10)
-                        console.log("packet " + i + " starts a new peiod");
+                        console.log("packet " + i + " starts a new period");
                         packets[i].link_packet_is_in = "";
                         packets[i].position_in_the_path = 0;
                         packets[i].going_from = "";
@@ -721,7 +738,7 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
                     }
                     else
                     {
-                        console.log("ERROR: attempting to send a packet when it was not received yet from the previous period");
+                        console.log("ERROR: attempting to send a packet " + i + " when it was not received yet from the previous period");
                     }
                 }
                 
@@ -848,6 +865,10 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
         // }
     
     // display status of the network
+    console.log("\n\nCALCULATING LATENCIES");
+    for (var i = 0; i < packets.length; i++) {
+        packets[i].stdev_of_latencies = stddev_of_an_array(packets[i].latencies_over_periods);
+    }
     console.log("\n\nDISPLAYING THE NETWORK");
     console.log(packets);
 }
