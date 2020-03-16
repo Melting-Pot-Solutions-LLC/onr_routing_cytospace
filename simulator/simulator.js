@@ -4,11 +4,13 @@
 //     AND VARIABLES
 //
 //---------------------
+var NUMMBER_OF_FLITS_PER_PACKET = 16;
+var NUMBER_OF_CYCLES_TO_TRANSMIT_A_FLIT = 35;
 var COLS = 6;
 var ROWS = 12;
 var LINK_TRANSMISSION_DELAY_CYCLES = 35;
 var LINK_TRANSMISSION_DELAY_DEVIATION = 2;
-var CYCLE_FREQUENCY_TO_SYNCHRONIZE_CHANNELS = 16;
+var CYCLE_FREQUENCY_TO_SYNCHRONIZE_CHANNELS = NUMBER_OF_CYCLES_TO_TRANSMIT_A_FLIT + NUMMBER_OF_FLITS_PER_PACKET;
 var NODE_PACKET_PROCESSING_DELAY = 0;
 var current_cycle = 0;
 var routing_table_from_json_file = {
@@ -224,6 +226,7 @@ function initialize_network() {
                             "packets_about_to_be_processed": [],
                             "packets_current_processing": [],
                             "packets_current_processing_counter": [],
+                            "number_of_flits_left_to_send_in_a_packet": 0,
                         },
                         "position": {},
                         "group": "edges",
@@ -247,6 +250,7 @@ function initialize_network() {
                             "packets_about_to_be_processed": [],
                             "packets_current_processing": [],
                             "packets_current_processing_counter": [],
+                            "number_of_flits_left_to_send_in_a_packet": 0,
                         },
                         "position": {},
                         "group": "edges",
@@ -270,6 +274,7 @@ function initialize_network() {
                             "packets_about_to_be_processed": [],
                             "packets_current_processing": [],
                             "packets_current_processing_counter": [],
+                            "number_of_flits_left_to_send_in_a_packet": 0,
                         },
                         "position": {},
                         "group": "edges",
@@ -292,6 +297,7 @@ function initialize_network() {
                             "packets_about_to_be_processed": [],
                             "packets_current_processing": [],
                             "packets_current_processing_counter": [],
+                            "number_of_flits_left_to_send_in_a_packet": 0,
                         },
                         "position": {},
                         "group": "edges",
@@ -386,7 +392,7 @@ for (var node in routing_table_from_json_file) {
     new_routing_tabe[node] = routing_table_from_json_file[node].split(",");
 }
 // simulate_routing_table_with_synchronized_periods(new_routing_tabe, 5, 400);
-simulate_routing_table_based_only_on_cycles(new_routing_tabe, 24000, 800);
+simulate_routing_table_based_only_on_cycles(new_routing_tabe, 800, 400);
 // var reader = new FileReader();
 // document.querySelector("#inputGroupFile01").addEventListener('change', function() {
 //     // list of selected files
@@ -724,8 +730,8 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
 
                     if(packets[i].status == "has_reached_master")
                     {
-                        if(i == 10)
-                        console.log("packet " + i + " starts a new period");
+                        // if(i == 10)
+                        // console.log("packet " + i + " starts a new period");
                         packets[i].link_packet_is_in = "";
                         packets[i].position_in_the_path = 0;
                         packets[i].going_from = "";
@@ -803,6 +809,7 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
                     var packets_currently_processing = link.data('packets_current_processing');
                     var packets_about_to_be_processed = link.data('packets_about_to_be_processed');
                     var packets_current_processing_counters = link.data('packets_current_processing_counter');
+                    var number_of_flits_left_to_send_in_a_packet = link.data('number_of_flits_left_to_send_in_a_packet');
                     for (var i = 0; i < packets_currently_processing.length; i++) {
                         packets_current_processing_counters[i]--;
                         if (packets_current_processing_counters[i] == 0) {
@@ -827,6 +834,7 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
                         
                         packets_current_processing_counters.push(o);
                         packets_about_to_be_processed.shift();
+                        number_of_flits_left_to_send_in_a_packet = NUMMBER_OF_FLITS_PER_PACKET+1;
                     } else if (packets_about_to_be_processed.length > 1) {
                         // collision - choose the packet with the lower index
                         // var r_index = Math.floor(Math.random() * packets_about_to_be_processed.length);
@@ -843,13 +851,17 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
                         packets_current_processing_counters.push(o);
 
                         packets_about_to_be_processed.splice(r_index, 1); // delete the element
+                        number_of_flits_left_to_send_in_a_packet = NUMMBER_OF_FLITS_PER_PACKET+1;
                     } else {
                         console.log("ERROR processing packets in the links");
                         alert("STOPPING ");
                     }
+
+                    number_of_flits_left_to_send_in_a_packet--;
                     link.json({ "data": { "packets_current_processing": packets_currently_processing } });
                     link.json({ "data": { "packets_about_to_be_processed": packets_about_to_be_processed } });
                     link.json({ "data": { "packets_current_processing_counter": packets_current_processing_counters } });
+                    link.json({ "data": { "number_of_flits_left_to_send_in_a_packet": number_of_flits_left_to_send_in_a_packet } });
                 });
             }
             // console.log("FINISHED PROCESSING CYCLE #" + cycle);
