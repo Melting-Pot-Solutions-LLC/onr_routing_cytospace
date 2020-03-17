@@ -8,9 +8,9 @@ var NUMMBER_OF_FLITS_PER_PACKET = 16;
 var NUMBER_OF_CYCLES_TO_TRANSMIT_A_FLIT = 35;
 var COLS = 6;
 var ROWS = 12;
-var LINK_TRANSMISSION_DELAY_CYCLES = 35;
+var LINK_TRANSMISSION_DELAY_CYCLES = NUMBER_OF_CYCLES_TO_TRANSMIT_A_FLIT + NUMMBER_OF_FLITS_PER_PACKET;
 var LINK_TRANSMISSION_DELAY_DEVIATION = 2;
-var CYCLE_FREQUENCY_TO_SYNCHRONIZE_CHANNELS = NUMBER_OF_CYCLES_TO_TRANSMIT_A_FLIT + NUMMBER_OF_FLITS_PER_PACKET;
+var CYCLE_FREQUENCY_TO_SYNCHRONIZE_CHANNELS = 8;
 var NODE_PACKET_PROCESSING_DELAY = 0;
 var current_cycle = 0;
 var routing_table_from_json_file = {
@@ -392,7 +392,7 @@ for (var node in routing_table_from_json_file) {
     new_routing_tabe[node] = routing_table_from_json_file[node].split(",");
 }
 // simulate_routing_table_with_synchronized_periods(new_routing_tabe, 5, 400);
-simulate_routing_table_based_only_on_cycles(new_routing_tabe, 800, 400);
+simulate_routing_table_based_only_on_cycles(new_routing_tabe, 24000, 800);
 // var reader = new FileReader();
 // document.querySelector("#inputGroupFile01").addEventListener('change', function() {
 //     // list of selected files
@@ -825,39 +825,45 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
                         }
                     }
                     if (packets_about_to_be_processed.length == 0) {} else if (packets_about_to_be_processed.length == 1) {
-                        // start processing the packet in the link
-                        packets_currently_processing.push(packets_about_to_be_processed[0]);
-                        packets[packets_about_to_be_processed[0]].status = "inside_a_link";
-                        packets[packets_about_to_be_processed[0]].link_packet_is_in = link.data('id');
-                        var o = get_random_link_transmission_delay();
-                        // console.log(o);
-                        
-                        packets_current_processing_counters.push(o);
-                        packets_about_to_be_processed.shift();
-                        number_of_flits_left_to_send_in_a_packet = NUMMBER_OF_FLITS_PER_PACKET+1;
+                        if(number_of_flits_left_to_send_in_a_packet == 0){
+                            // start processing the packet in the link
+                            packets_currently_processing.push(packets_about_to_be_processed[0]);
+                            packets[packets_about_to_be_processed[0]].status = "inside_a_link";
+                            packets[packets_about_to_be_processed[0]].link_packet_is_in = link.data('id');
+                            var o = get_random_link_transmission_delay();
+                            // console.log(o);
+                            
+                            packets_current_processing_counters.push(o);
+                            packets_about_to_be_processed.shift();
+                            number_of_flits_left_to_send_in_a_packet = NUMMBER_OF_FLITS_PER_PACKET+1;
+                        }
                     } else if (packets_about_to_be_processed.length > 1) {
-                        // collision - choose the packet with the lower index
-                        // var r_index = Math.floor(Math.random() * packets_about_to_be_processed.length);
-                        // var r = packets_about_to_be_processed[r_index];
-                        var r = Math.min(...packets_about_to_be_processed);
-                        var r_index = packets_about_to_be_processed.indexOf(r);
+                        if(number_of_flits_left_to_send_in_a_packet == 0){
+                            // collision - choose the packet with the lower index
+                            // var r_index = Math.floor(Math.random() * packets_about_to_be_processed.length);
+                            // var r = packets_about_to_be_processed[r_index];
+                            var r = Math.min(...packets_about_to_be_processed);
+                            var r_index = packets_about_to_be_processed.indexOf(r);
 
-                        packets_currently_processing.push(r);
-                        packets[r].status = "inside_a_link";
-                        packets[r].link_packet_is_in = link.data('id');
-                        var o = get_random_link_transmission_delay();
-                        // console.log(o + " + " + r);
-                        // console.log(packets_about_to_be_processed);
-                        packets_current_processing_counters.push(o);
+                            packets_currently_processing.push(r);
+                            packets[r].status = "inside_a_link";
+                            packets[r].link_packet_is_in = link.data('id');
+                            var o = get_random_link_transmission_delay();
+                            // console.log(o + " + " + r);
+                            // console.log(packets_about_to_be_processed);
+                            packets_current_processing_counters.push(o);
 
-                        packets_about_to_be_processed.splice(r_index, 1); // delete the element
-                        number_of_flits_left_to_send_in_a_packet = NUMMBER_OF_FLITS_PER_PACKET+1;
+                            packets_about_to_be_processed.splice(r_index, 1); // delete the element
+                            number_of_flits_left_to_send_in_a_packet = NUMMBER_OF_FLITS_PER_PACKET+1;
+                        }
                     } else {
                         console.log("ERROR processing packets in the links");
                         alert("STOPPING ");
                     }
 
-                    number_of_flits_left_to_send_in_a_packet--;
+                    if(number_of_flits_left_to_send_in_a_packet>0) 
+                        number_of_flits_left_to_send_in_a_packet--;
+
                     link.json({ "data": { "packets_current_processing": packets_currently_processing } });
                     link.json({ "data": { "packets_about_to_be_processed": packets_about_to_be_processed } });
                     link.json({ "data": { "packets_current_processing_counter": packets_current_processing_counters } });
@@ -879,8 +885,17 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
     // display status of the network
     console.log("\n\nCALCULATING LATENCIES");
     for (var i = 0; i < packets.length; i++) {
-        packets[i].stdev_of_latencies = stddev_of_an_array(packets[i].latencies_over_periods);
+        // packets[i].stdev_of_latencies = stddev_of_an_array(packets[i].latencies_over_periods);
     }
     console.log("\n\nDISPLAYING THE NETWORK");
     console.log(packets);
+
+    // console.log("\n\nDISPLAYING THE LINKS");
+    // cy.edges().forEach(function(link) {
+    //     console.log(link.data('packets_current_processing'));
+    //     console.log(link.data('packets_current_processing_counter'));
+    //     console.log(link.data('number_of_flits_left_to_send_in_a_packet'));
+        
+    //     // console.log(link.data('packets_current_processing'));
+    //     });
 }
