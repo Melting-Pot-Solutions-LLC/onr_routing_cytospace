@@ -397,7 +397,7 @@ for (var node in routing_table_from_json_file) {
     new_routing_tabe[node] = routing_table_from_json_file[node].split(",");
 }
 // simulate_routing_table_with_synchronized_periods(new_routing_tabe, 5, 400);
-simulate_routing_table_based_only_on_cycles(new_routing_tabe, 800, 800);
+simulate_routing_table_based_only_on_cycles(new_routing_tabe, 24000, 800);
 // var reader = new FileReader();
 // document.querySelector("#inputGroupFile01").addEventListener('change', function() {
 //     // list of selected files
@@ -945,28 +945,39 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
 
 
     //calculating how many collisions happen for packets with different hop counts
-    console.log("\n\n\n Calculating how many collisions happen for links with different distances from the master node");
-    for(var i = 1; i <= ((COLS+ROWS)+1)/2; i++)
-    {
-        console.log("\nFor " + i + " hops:");
-        var sum = 0;
-        cy.edges().forEach(function(link) 
-        {
-            var source = link.data('source');
-            for (var j = 0; j < packets.length; j++) 
-            {
-                if(("#" + source).localeCompare(packets[j].origin) == 0)
-                {
-                    if(i+1 == packets[j].path.length)
-                    {
-                        var number_of_collisions = link.data('number_of_collisions');
-                        console.log(number_of_collisions + " cycles");
-                        sum += number_of_collisions;
-                    }
+    console.log("\n\n\n Calculating how many collisions happen for links ");
+    // for(var i = 1; i <= ((COLS+ROWS)+1)/2; i++)
+    // {
+    //     console.log("\nFor " + i + " hops:");
+    //     var sum = 0;
 
-                }
-            }
-        });
-        console.log("TOTAL: " + sum + " cycles");
-    }
+    //     for (var j = 0; j < packets.length; j++) 
+    //     {
+    //         if(packets[j].path.length == i+1)
+    //         {
+    //             cy.edges().forEach(function(link) {
+    //                 if((('#' + link.data('source')).localeCompare(packets[j].path[packets[j].path.length-1]) == 0) && 
+    //                     (('#' + link.data('target')).localeCompare(packets[j].path[packets[j].path.length-2]) == 0)) 
+    //                     {
+    //                         console.log(link.data('id') + " " + link.data('number_of_collisions') + " cycles");
+    //                         sum += link.data('number_of_collisions')
+    //                     }
+    //                 else{ if((('#' + link.data('source')).localeCompare(packets[j].path[packets[j].path.length-2]) == 0) && 
+    //                     (('#' + link.data('target')).localeCompare(packets[j].path[packets[j].path.length-1]) == 0)) 
+    //                     {
+    //                         console.log(link.data('id') + " " + link.data('number_of_collisions') + " cycles");
+    //                         sum += link.data('number_of_collisions')
+    //                     }  }  
+
+    //             });
+
+                
+    //         }
+    //     }
+        
+    //     console.log("TOTAL: " + sum + " cycles");
+    // }
+    cy.edges().forEach(function(link) {
+        console.log(link.data('id') + " " + link.data('number_of_collisions') + " cycles"); 
+    });
 }
