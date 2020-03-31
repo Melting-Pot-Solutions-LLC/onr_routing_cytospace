@@ -87,6 +87,16 @@ var routing_table_from_json_file = {
     "#n-0-6": "#n-0-6,#n-0-7,#n-0-8,#n-0-9,#n-0-10,#n-0-11,#n-0-0"
 }
 
+function average_of_an_array(array)
+{
+    var total = 0;
+    for(var i = 0; i < array.length; i++) {
+        total += array[i];
+    }
+    var avg = total / array.length;
+    return avg;
+}
+
 function stddev_of_an_array(array)
 {
     const n = array.length;
@@ -397,7 +407,7 @@ for (var node in routing_table_from_json_file) {
     new_routing_tabe[node] = routing_table_from_json_file[node].split(",");
 }
 // simulate_routing_table_with_synchronized_periods(new_routing_tabe, 5, 400);
-simulate_routing_table_based_only_on_cycles(new_routing_tabe, 24000, 800);
+simulate_routing_table_based_only_on_cycles(new_routing_tabe, 2000, 600);
 // var reader = new FileReader();
 // document.querySelector("#inputGroupFile01").addEventListener('change', function() {
 //     // list of selected files
@@ -910,9 +920,32 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
     
     // display status of the network
     console.log("\n\nCALCULATING LATENCIES");
-    for (var i = 0; i < packets.length; i++) {
-        // packets[i].stdev_of_latencies = stddev_of_an_array(packets[i].latencies_over_periods);
+    // for (var i = 0; i < packets.length; i++) {
+    //     // packets[i].stdev_of_latencies = stddev_of_an_array(packets[i].latencies_over_periods);
+
+    // }
+
+    for(var i = 1; i <= ((COLS+ROWS)+1)/2; i++)
+    {
+        console.log("\nFor " + i + " hops:");
+        var average = 0;
+        var array_of_latencies = new Array();
+        for (var j = 0; j < packets.length; j++) 
+        {
+            if(packets[j].path.length == i+1)
+            {
+                for(var k=0; k < packets[j].latencies_over_periods.length; k++)
+                {
+                    array_of_latencies.push((packets[j].latencies_over_periods)[k]);
+                }
+                
+            }
+        }
+        console.log( array_of_latencies)
+        console.log("average latency: " + average_of_an_array(array_of_latencies) + " cycles");
+
     }
+
     console.log("\n\nDISPLAYING THE NETWORK");
     console.log(packets);
 
@@ -927,25 +960,25 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
 
 
     // calculating how many collisions happen for packets with different hop counts
-    console.log("\n\n\n Calculating how many collisions happen for packets with different hop counts");
-    for(var i = 1; i <= ((COLS+ROWS)+1)/2; i++)
-    {
-        console.log("\nFor " + i + " hops:");
-        var sum = 0;
-        for (var j = 0; j < packets.length; j++) 
-        {
-            if(packets[j].path.length == i+1)
-            {
-                console.log(packets[j].number_of_collisions + " cycles");
-                sum += packets[j].number_of_collisions;
-            }
-        }
-        console.log("TOTAL: " + sum + " cycles");
-    }
+    // console.log("\n\n\n Calculating how many collisions happen for packets with different hop counts");
+    // for(var i = 1; i <= ((COLS+ROWS)+1)/2; i++)
+    // {
+    //     console.log("\nFor " + i + " hops:");
+    //     var sum = 0;
+    //     for (var j = 0; j < packets.length; j++) 
+    //     {
+    //         if(packets[j].path.length == i+1)
+    //         {
+    //             console.log(packets[j].number_of_collisions + " cycles");
+    //             sum += packets[j].number_of_collisions;
+    //         }
+    //     }
+    //     console.log("TOTAL: " + sum + " cycles");
+    // }
 
 
     //calculating how many collisions happen for packets with different hop counts
-    console.log("\n\n\n Calculating how many collisions happen for links ");
+    // console.log("\n\n\n Calculating how many collisions happen for links ");
     // for(var i = 1; i <= ((COLS+ROWS)+1)/2; i++)
     // {
     //     console.log("\nFor " + i + " hops:");
@@ -977,7 +1010,7 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
         
     //     console.log("TOTAL: " + sum + " cycles");
     // }
-    cy.edges().forEach(function(link) {
-        console.log(link.data('id') + " " + link.data('number_of_collisions') + " cycles"); 
-    });
+    // cy.edges().forEach(function(link) {
+    //     console.log(link.data('id') + " " + link.data('number_of_collisions') + " cycles"); 
+    // });
 }
