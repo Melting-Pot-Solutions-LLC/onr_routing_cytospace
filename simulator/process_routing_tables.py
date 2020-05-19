@@ -199,8 +199,9 @@ def fully_process_routing_table(current_routing_table):
 		#create_a_table_with_average_link_load(current_routing_table)
 		return True
 	else:
-		print("This routing table is not ideal")
-		print(str(link_load[0]) + " " + str(link_load[COLS-1])+ " "  + str(link_load[COLS])+ " "  +str(link_load[COLS*ROWS*2-COLS]))
+		# print("This routing table is not ideal")
+		# print(str(link_load[0]) + " " + str(link_load[COLS-1])+ " "  + str(link_load[COLS])+ " "  +str(link_load[COLS*ROWS*2-COLS]))
+		# print(json.dumps(routing_table))
 		return False
 		# sys.exit()
 
@@ -356,7 +357,7 @@ it = False
 i = 0
 number_of_ideal_routing_tables = 0
 # generate a routing table
-while (i < 1000000):
+while (i < 100000):
 	routing_table = enumerate_random_paths(my_dict)
 	it = fully_process_routing_table(routing_table)
 	i = i + 1
@@ -369,7 +370,7 @@ print("went through " + str(i)  + " routings tables")
 print(str(number_of_ideal_routing_tables)  + " were ideal")
 r = json.dumps(routing_table)
 print(r)
-print(type(r))
+# print(type(r))
 	# print("Table is processed")
 	# if(i%100 == 0 and i != 0):
 	# print("done with another 100 routing tables")
