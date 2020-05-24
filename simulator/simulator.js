@@ -1100,10 +1100,12 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
     // }
     // console.log("\n\nJITTER = " + CLOCK_JITTER_PERCENT);
     final_string_output += ("\n\nRT #" + routing_table_number +" JITTER = " + CLOCK_JITTER_PERCENT);
+    final_string_output_support = "\n\nLATENCIES";
     for(var i = 1; i <= ((COLS+ROWS)+1)/2; i++)
     {
         // console.log("\nFor " + i + " hops:");
-        final_string_output += ("\n" + i + " hops:");
+        final_string_output += ("\n" + i + " hops:,");
+        final_string_output_support += ("\n" + i + " hops:,");
         var average = 0;
         var array_of_latencies = new Array();
         for (var j = 0; j < packets.length; j++) 
@@ -1113,6 +1115,7 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
                 for(var k=0; k < packets[j].latencies_over_periods.length; k++)
                 {
                     array_of_latencies.push((packets[j].latencies_over_periods)[k]);
+
                 }
                 
             }
@@ -1120,9 +1123,14 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
         // console.log("jitter = " +  (Math.round((stddev_of_an_array(array_of_latencies) + Number.EPSILON) * 1000) / 1000));
         final_string_output += (", " +  (Math.round((stddev_of_an_array(array_of_latencies) + Number.EPSILON) * 1000) / 1000));
         // console.log( array_of_latencies)
+        final_string_output_support += array_of_latencies;
         // console.log("average latency: " + average_of_an_array(array_of_latencies) + " cycles");
 
     }
+
+    // latencies only
+    final_string_output += final_string_output_support;
+
 
     // console.log("\n\nDISPLAYING THE NETWORK");
     // console.log(packets);
@@ -1157,37 +1165,52 @@ function simulate_routing_table_based_only_on_cycles(routing_table_json, number_
 
     //calculating how many collisions happen for packets with different hop counts
     // console.log("\n\n\n Calculating how many collisions happen for links ");
-    // for(var i = 1; i <= ((COLS+ROWS)+1)/2; i++)
-    // {
-    //     console.log("\nFor " + i + " hops:");
-    //     var sum = 0;
 
-    //     for (var j = 0; j < packets.length; j++) 
-    //     {
-    //         if(packets[j].path.length == i+1)
-    //         {
-    //             cy.edges().forEach(function(link) {
-    //                 if((('#' + link.data('source')).localeCompare(packets[j].path[packets[j].path.length-1]) == 0) && 
-    //                     (('#' + link.data('target')).localeCompare(packets[j].path[packets[j].path.length-2]) == 0)) 
-    //                     {
-    //                         console.log(link.data('id') + " " + link.data('number_of_collisions') + " cycles");
-    //                         sum += link.data('number_of_collisions')
-    //                     }
-    //                 else{ if((('#' + link.data('source')).localeCompare(packets[j].path[packets[j].path.length-2]) == 0) && 
-    //                     (('#' + link.data('target')).localeCompare(packets[j].path[packets[j].path.length-1]) == 0)) 
-    //                     {
-    //                         console.log(link.data('id') + " " + link.data('number_of_collisions') + " cycles");
-    //                         sum += link.data('number_of_collisions')
-    //                     }  }  
+    final_string_output += "\n\nCOLLISIONS"
+    var stalls_per_hop_array = new Array();
+    for(var i = 1; i <= ((COLS+ROWS)+1)/2; i++)
+    {
+        // console.log("\nFor " + i + " hops:");
+        final_string_output += "\nFor " + i + " hops:, ";
+        var sum = 0;
 
-    //             });
+        for (var j = 0; j < packets.length; j++) 
+        {
+            if(packets[j].path.length == i+1)
+            {
+                cy.edges().forEach(function(link) {
+                    if((('#' + link.data('source')).localeCompare(packets[j].path[packets[j].path.length-1]) == 0) && 
+                        (('#' + link.data('target')).localeCompare(packets[j].path[packets[j].path.length-2]) == 0)) 
+                        {
+                            // console.log(link.data('id') + " " + link.data('number_of_collisions') + " cycles");
+                            final_string_output += link.data('number_of_collisions') + ", ";
+                            sum += link.data('number_of_collisions')
+                            stalls_per_hop_array.push(link.data('number_of_collisions') / i);
+                            console.log(link.data('number_of_collisions') / i);
+                        }
+                    else{ if((('#' + link.data('source')).localeCompare(packets[j].path[packets[j].path.length-2]) == 0) && 
+                        (('#' + link.data('target')).localeCompare(packets[j].path[packets[j].path.length-1]) == 0)) 
+                        {
+                            // console.log(link.data('id') + " " + link.data('number_of_collisions') + " cycles");
+                            final_string_output += link.data('number_of_collisions')  + ", ";
+                            sum += link.data('number_of_collisions')
+                            stalls_per_hop_array.push(link.data('number_of_collisions') / i);
+                            console.log(link.data('number_of_collisions') / i);
+                        }  
+                    }  
+
+                });
 
                 
-    //         }
-    //     }
+            }
+        }
         
-    //     console.log("TOTAL: " + sum + " cycles");
-    // }
+        // console.log("TOTAL: " + sum + " cycles");
+        //final_string_output += "TOTAL: " + sum + " cycles";
+    }
+
+    final_string_output += "\nAVERAGE STALLS PER HOP, " + average_of_an_array(stalls_per_hop_array);
+
     // cy.edges().forEach(function(link) {
     //     console.log(link.data('id') + " " + link.data('number_of_collisions') + " cycles"); 
     // });
