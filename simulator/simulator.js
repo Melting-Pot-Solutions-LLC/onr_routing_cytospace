@@ -498,7 +498,7 @@ function simulate_routing_table(routing_table, clock_jitter, routing_table_numbe
 	for (var node in routing_table) {
 	    new_routing_table[node] = routing_table[node].split(",");
 	}
-	return simulate_routing_table_based_only_on_cycles(new_routing_table, 63000, 900, routing_table_number);
+	return simulate_routing_table_based_only_on_cycles(new_routing_table, 6300, 900, routing_table_number);
 }
 
 
