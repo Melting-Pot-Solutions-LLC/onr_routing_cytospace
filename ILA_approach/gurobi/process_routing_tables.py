@@ -17,6 +17,7 @@ GLOBAL VARIABLES
 """
 ROWS = 5
 COLS = 5
+NUMBER_OF_TICKS = 6
 
 link_load = []
 max_total_load_seen_by_packet_over_number_of_hops_array = []
@@ -353,7 +354,48 @@ while i<(len(ar)-1):
 	i = i+1
  
 import json
-print(my_dict)
+
+
+# 
+#
+# GENERATE ILA CODE
+#
+#
+
+f = open("routing_5x5.lp", "w")
+
+
+ila_variables = []
+for pi in range(ROWS):
+	for pj in range(COLS):
+		for t in range(NUMBER_OF_TICKS):
+			for ni in range(ROWS):
+				for nj in range(ROWS):
+					ila_variables.append("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj))
+
+# minimize section
+f.write("minimize\n")
+for x in ila_variables:
+	if(("P_0_0" not in x)):
+		f.write(x)	
+		f.write("+")
+f.write("0\n\n\n")
+
+
+
+# constraints section
+f.write("subject to\n")
+f.write("\\ each packet can only be in one node at a time \n")
+for pi in range(ROWS):
+	for pj in range(COLS):
+		for t in range(NUMBER_OF_TICKS):
+			s=""
+			for ni in range(ROWS):
+				for nj in range(ROWS):
+					s = s+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj))
+
+f.close()
+
 # it = False
 # i = 0
 # number_of_ideal_routing_tables = 0
