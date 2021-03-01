@@ -15,9 +15,9 @@ import pdb
 """
 GLOBAL VARIABLES
 """
-ROWS = 5
-COLS = 5
-NUMBER_OF_TICKS = 6
+ROWS = 10
+COLS = 10
+NUMBER_OF_TICKS = 11
 
 link_load = []
 max_total_load_seen_by_packet_over_number_of_hops_array = []
@@ -44,6 +44,21 @@ print ("ideal_load_per_side = " + str(ideal_load_per_side))
 """
 SUPPORTING FUNCTIONS
 """
+
+def get_neighbors_for_node(node_coordinates):
+	# default case
+	node_row = node_coordinates[0]
+	node_col = node_coordinates[1]
+	top_row = (node_row - 1) if (node_row != 0) else ROWS-1
+	top_col = node_col
+	bot_row = (node_row + 1) if (node_row != ROWS-1) else 0
+	bot_col = node_col
+	left_row = node_row
+	left_col = (node_col - 1) if (node_col != 0) else COLS-1
+	right_row = node_row
+	right_col = (node_col + 1) if (node_col != COLS-1) else 0
+	return [[top_row, top_col], [right_row, right_col], [bot_row, bot_col], [left_row, left_col]]
+
 
 def reset_link_load():
 	global link_load
@@ -362,38 +377,82 @@ import json
 #
 #
 
-f = open("routing_5x5.lp", "w")
+f = open("routing_" + str(ROWS) + "x" + str(COLS) + ".lp", "w")
 
 
 ila_variables = []
 for pi in range(ROWS):
 	for pj in range(COLS):
+		if(pi==0 and pj==0):
+			continue
 		for t in range(NUMBER_OF_TICKS):
 			for ni in range(ROWS):
 				for nj in range(ROWS):
+					# if(t==0 and (ni!=pi or nj!=pj)):
+						# continue
 					ila_variables.append("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj))
 
 # minimize section
 f.write("minimize\n")
 for x in ila_variables:
-	if(("P_0_0" not in x)):
+	if(("P_0_0" not in x) and ("N_0_0" not in x)):
 		f.write(x)	
-		f.write("+")
+		f.write(" + ")
 f.write("0\n\n\n")
 
 
-
+#
 # constraints section
+#
+
 f.write("subject to\n")
 f.write("\\ each packet can only be in one node at a time \n")
 for pi in range(ROWS):
 	for pj in range(COLS):
+		if(pi==0 and pj==0):
+			continue
+		f.write("\\ packet " + str(pi) + "_" + str(pj) + " \n")
 		for t in range(NUMBER_OF_TICKS):
 			s=""
 			for ni in range(ROWS):
-				for nj in range(ROWS):
-					s = s+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj))
+				for nj in range(COLS):
+					s = s+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" + "
+			s=s+" 0 = 1"
+			f.write(s+"\n")
 
+f.write("\\ each packet not at master must move one position in one tick\n")
+for pi in range(ROWS):
+	for pj in range(COLS):
+		if(pi==0 and pj==0):
+			continue
+		f.write("\\ packet " + str(pi) + "_" + str(pj) + " \n")
+		for t in range(NUMBER_OF_TICKS-1):
+			for ni in range(ROWS):
+				for nj in range(COLS):
+					if(ni==0 and nj==0):
+						continue
+					neighbors = get_neighbors_for_node([ni, nj])
+					f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[0][0])+"_"+str(neighbors[0][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[1][0])+"_"+str(neighbors[1][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[2][0])+"_"+str(neighbors[2][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[3][0])+"_"+str(neighbors[3][1])+" - P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" >= 0\n")
+
+f.write("\n\\ initial values\n")
+for pi in range(ROWS):
+	for pj in range(COLS):
+		# if(pi==0 and pj==0):
+		# 	continue
+		f.write("P_"+str(pi)+"_"+str(pj)+"_T_0_N_"+ str(pi)+"_"+str(pj)+" = 1\n")
+
+
+#
+# variables
+#
+
+
+f.write("\n\\ list of all variables\n")
+f.write("binary\n")
+for x in ila_variables:
+	f.write(x + "\n")
+
+f.write("end\n")
 f.close()
 
 # it = False

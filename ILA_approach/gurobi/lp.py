@@ -21,6 +21,11 @@ def create_routing_table_from_array_of_lp_variables(packets_in_nodes):
         else:
             routes[packet_name] = [x];
     print(routes)
+    f = open("routes.txt", "w")
+    for key, value in routes.items():
+        f.write(str(key)+ ' : '+ str(value))
+        f.write("\n\n")
+    f.close()
 
 def find_nth(string, substring, what_occurance):
     start = string.find(substring)
@@ -56,7 +61,7 @@ if model.status == GRB.OPTIMAL:
     model.write('model.sol')
     variables_solved = model.getVars()
     packets_in_nodes = [var.VarName for var in variables_solved if var.x==1.0]
-    print(packets_in_nodes)
+    # print(packets_in_nodes)
     create_routing_table_from_array_of_lp_variables(packets_in_nodes)
     sys.exit(0)
 
