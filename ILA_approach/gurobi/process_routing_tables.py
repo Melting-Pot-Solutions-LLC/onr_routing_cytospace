@@ -15,8 +15,8 @@ import pdb
 """
 GLOBAL VARIABLES
 """
-ROWS = 10
-COLS = 10
+ROWS = 6
+COLS = 12
 NUMBER_OF_TICKS = 11
 
 link_load = []
@@ -387,7 +387,7 @@ for pi in range(ROWS):
 			continue
 		for t in range(NUMBER_OF_TICKS):
 			for ni in range(ROWS):
-				for nj in range(ROWS):
+				for nj in range(COLS):
 					# if(t==0 and (ni!=pi or nj!=pj)):
 						# continue
 					ila_variables.append("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj))
@@ -433,6 +433,46 @@ for pi in range(ROWS):
 						continue
 					neighbors = get_neighbors_for_node([ni, nj])
 					f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[0][0])+"_"+str(neighbors[0][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[1][0])+"_"+str(neighbors[1][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[2][0])+"_"+str(neighbors[2][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[3][0])+"_"+str(neighbors[3][1])+" - P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" >= 0\n")
+
+# MOST IMPORTANT THING: LOAD BALACNE
+f.write("\n\n\\ ========= LOAD BALANCE =========\n")
+f.write("\\ number of packets on each side need to be (COLS*ROWS-1)/4\n")
+f.write("\\ EAST\n")
+for x in ila_variables:
+	if("P_0_0" not in x):
+		# east
+		if(x[-5:]== "N_0_1"):
+			f.write(x + " + ")
+f.write(" 0 <= " + str(int(math.ceil((ROWS*COLS-1)/4.0))))
+f.write("\n")
+
+f.write("\\ SOUTH\n")
+for x in ila_variables:
+	if("P_0_0" not in x):
+		# east
+		if(x[-5:]== "N_1_0"):
+			f.write(x + " + ")
+f.write(" 0 <= " + str(int(math.ceil((ROWS*COLS-1)/4.0))))
+f.write("\n")
+
+f.write("\\ WEST\n")
+for x in ila_variables:
+	if("P_0_0" not in x):
+		# east
+		if(x[-6:]== "N_0_11"):
+			f.write(x + " + ")
+f.write(" 0 <= " + str(int(math.ceil((ROWS*COLS-1)/4.0))))
+f.write("\n")
+
+f.write("\\ NORTH\n")
+for x in ila_variables:
+	if("P_0_0" not in x):
+		# east
+		if(x[-5:]== "N_5_0"):
+			f.write(x + " + ")
+f.write(" 0 <= " + str(int(math.ceil((ROWS*COLS-1)/4.0))))
+f.write("\n")
+
 
 f.write("\n\\ initial values\n")
 for pi in range(ROWS):
