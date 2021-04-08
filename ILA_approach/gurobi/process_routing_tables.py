@@ -17,7 +17,7 @@ GLOBAL VARIABLES
 """
 ROWS = 6
 COLS = 12
-NUMBER_OF_TICKS = 11
+NUMBER_OF_TICKS = 20
 
 link_load = []
 max_total_load_seen_by_packet_over_number_of_hops_array = []
@@ -420,7 +420,7 @@ for pi in range(ROWS):
 			s=s+" 0 = 1"
 			f.write(s+"\n")
 
-f.write("\\ each packet not at master must move one position in one tick\n")
+f.write("\\ each packet not at master must move one position in one tick or stay in the same node\n")
 for pi in range(ROWS):
 	for pj in range(COLS):
 		if(pi==0 and pj==0):
@@ -432,7 +432,7 @@ for pi in range(ROWS):
 					if(ni==0 and nj==0):
 						continue
 					neighbors = get_neighbors_for_node([ni, nj])
-					f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[0][0])+"_"+str(neighbors[0][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[1][0])+"_"+str(neighbors[1][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[2][0])+"_"+str(neighbors[2][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[3][0])+"_"+str(neighbors[3][1])+" - P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" >= 0\n")
+					f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[0][0])+"_"+str(neighbors[0][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[1][0])+"_"+str(neighbors[1][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[2][0])+"_"+str(neighbors[2][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[3][0])+"_"+str(neighbors[3][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(ni)+"_"+str(nj)+" - P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" >= 0\n")
 
 # MOST IMPORTANT THING: LOAD BALACNE
 f.write("\n\n\\ ========= LOAD BALANCE =========\n")
@@ -459,7 +459,7 @@ f.write("\\ WEST\n")
 for x in ila_variables:
 	if("P_0_0" not in x):
 		# east
-		if(x[-6:]== "N_0_11"):
+		if(x[-6:]== ("N_0_"+str(COLS-1))):
 			f.write(x + " + ")
 f.write(" 0 <= " + str(int(math.ceil((ROWS*COLS-1)/4.0))))
 f.write("\n")
@@ -468,10 +468,40 @@ f.write("\\ NORTH\n")
 for x in ila_variables:
 	if("P_0_0" not in x):
 		# east
-		if(x[-5:]== "N_5_0"):
+		if(x[-5:]== ("N_" + str(ROWS-1)+"_0")):
 			f.write(x + " + ")
 f.write(" 0 <= " + str(int(math.ceil((ROWS*COLS-1)/4.0))))
 f.write("\n")
+
+
+# AVOIDING PACKET COLLISIONS - CONFLICTS
+f.write("\n\n\\ ========= CONFLICT AVOINDANCE =========\n")
+f.write("\\ no two packets located in node n at cycle i can't be located in node m (n's neighbor) at cycle i+1\n")
+for p1i in range(ROWS):
+	for p1j in range(COLS):
+		if(p1i==0 and p1j==0):
+			continue
+		for p2i in range(ROWS):
+			for p2j in range(COLS):
+				if(p2i==0 and p2j==0):
+					continue
+				if (p1i==p2i and p1j==p2j):
+					continue
+				f.write("\\ avoiding conflicts for packets " + str(p1i) + "_" + str(p1j) + " and " + str(p2i) + "_" + str(p2j) + " \n")
+				for t in range(NUMBER_OF_TICKS-1):
+					if(t==0):
+						continue
+					for ni in range(ROWS):
+						for nj in range(COLS):
+							if(ni==0 and nj==0):
+								continue
+							neighbors = get_neighbors_for_node([ni, nj])
+							f.write("P_"+str(p1i)+"_"+str(p1j)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" + "+"P_"+str(p2i)+"_"+str(p2j)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" + "+"P_"+str(p1i)+"_"+str(p1j)+"_T_"+str(t+1)+"_N_"+str(neighbors[0][0])+"_"+str(neighbors[0][1])+" + "+"P_"+str(p2i)+"_"+str(p2j)+"_T_"+str(t+1)+"_N_"+str(neighbors[0][0])+"_"+str(neighbors[0][1])+" <= 3\n")
+							f.write("P_"+str(p1i)+"_"+str(p1j)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" + "+"P_"+str(p2i)+"_"+str(p2j)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" + "+"P_"+str(p1i)+"_"+str(p1j)+"_T_"+str(t+1)+"_N_"+str(neighbors[1][0])+"_"+str(neighbors[1][1])+" + "+"P_"+str(p2i)+"_"+str(p2j)+"_T_"+str(t+1)+"_N_"+str(neighbors[1][0])+"_"+str(neighbors[1][1])+" <= 3\n")
+							f.write("P_"+str(p1i)+"_"+str(p1j)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" + "+"P_"+str(p2i)+"_"+str(p2j)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" + "+"P_"+str(p1i)+"_"+str(p1j)+"_T_"+str(t+1)+"_N_"+str(neighbors[2][0])+"_"+str(neighbors[2][1])+" + "+"P_"+str(p2i)+"_"+str(p2j)+"_T_"+str(t+1)+"_N_"+str(neighbors[2][0])+"_"+str(neighbors[2][1])+" <= 3\n")
+							f.write("P_"+str(p1i)+"_"+str(p1j)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" + "+"P_"+str(p2i)+"_"+str(p2j)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" + "+"P_"+str(p1i)+"_"+str(p1j)+"_T_"+str(t+1)+"_N_"+str(neighbors[3][0])+"_"+str(neighbors[3][1])+" + "+"P_"+str(p2i)+"_"+str(p2j)+"_T_"+str(t+1)+"_N_"+str(neighbors[3][0])+"_"+str(neighbors[3][1])+" <= 3\n")
+
+
 
 
 f.write("\n\\ initial values\n")
@@ -480,6 +510,15 @@ for pi in range(ROWS):
 		# if(pi==0 and pj==0):
 		# 	continue
 		f.write("P_"+str(pi)+"_"+str(pj)+"_T_0_N_"+ str(pi)+"_"+str(pj)+" = 1\n")
+
+f.write("\n\\ All packets require reach the master node\n")
+
+for pi in range(ROWS):
+	for pj in range(COLS):
+		# if(pi==0 and pj==0):
+		# 	continue
+		f.write("P_"+str(pi)+"_"+str(pj)+"_T_" + str(NUMBER_OF_TICKS-1) + "_N_0_0 = 1\n")
+
 
 
 #
