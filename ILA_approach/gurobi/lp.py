@@ -11,8 +11,8 @@
 # and writes it to a file
 
 import collections
-ROWS = 6
-COLS = 12
+ROWS = 5
+COLS = 5
 
 
 def extract_origin_packet_substring(packet_at_cycle_string):
@@ -57,29 +57,7 @@ def create_routing_table_from_array_of_lp_variables(packets_in_nodes):
     for key, value in routes.items():
         f.write(str(key)+ ' : '+ str(value))
         f.write("\n\n")
-    f.write("\n\n")
-    f.write("\n\n")
-    f.write("\n\n")
-    f.write("\n\n")
-    f.write("======== LOAD BALANCE (SUPPOSEDLY, NOT ACCURATE) =============\n")
-    south = 0
-    north = 0
-    west = 0
-    east = 0
-    for x in packets_in_nodes:
-        if(x[find_nth(x, "N_", 1):]== "N_0_1"):
-            east = east + 1
-        elif (x[find_nth(x, "N_", 1):] == "N_1_0"):
-            south = south + 1
-        elif(x[find_nth(x, "N_", 1):]== ("N_0_"+str(COLS-1))): # :
-            west = west + 1
-        elif(x[find_nth(x, "N_", 1):]== ("N_" + str(ROWS-1)+"_0")):
-            north = north + 1
-    f.write("NORTH - " + str(north) + "\n")
-    f.write("SOUTH - " + str(south) + "\n")
-    f.write("WEST - " + str(west) + "\n")
-    f.write("EAST - " + str(east) + "\n")
-    f.write(str(len(routes)))
+
 
     f.write("\n\n")
     f.write("\n\n")
@@ -100,6 +78,7 @@ def create_routing_table_from_array_of_lp_variables(packets_in_nodes):
             packets_at_cycles[packet_cycle][current_node] = [x] 
 
     packets_at_cycles = collections.OrderedDict(sorted(packets_at_cycles.items()))
+    number_of_cycles = (packets_at_cycles.keys()[-1]) + 1
     for key, value in packets_at_cycles.items():
         f.write(str(key)+ ' : '+ str(value))
         f.write("\n\n")
@@ -120,6 +99,7 @@ def create_routing_table_from_array_of_lp_variables(packets_in_nodes):
                         # print packets_at_node
                         # print packets_at_cycles[cycle+1][neighbors_of_node[0]]
                         number_of_conflicts = number_of_conflicts + (intersection*(intersection-1))/2
+                        print(list1_as_set.intersection(extract_origin_packet_substrings_for_list(packets_at_cycles[cycle+1][neighbors_of_node[0]])))
                         # print "+" + str((intersection*(intersection-1))/2) + " conflicts"
                         # print "\n\n"
                 if(neighbors_of_node[1] in packets_at_cycles[cycle+1]):
@@ -129,6 +109,7 @@ def create_routing_table_from_array_of_lp_variables(packets_in_nodes):
                         # print packets_at_node
                         # print packets_at_cycles[cycle+1][neighbors_of_node[1]]
                         number_of_conflicts = number_of_conflicts + (intersection*(intersection-1))/2
+                        print(list1_as_set.intersection(extract_origin_packet_substrings_for_list(packets_at_cycles[cycle+1][neighbors_of_node[1]])))
                         # print "+" + str((intersection*(intersection-1))/2) + " conflicts"
                         # print "\n\n"
                 if(neighbors_of_node[2] in packets_at_cycles[cycle+1]):
@@ -138,6 +119,7 @@ def create_routing_table_from_array_of_lp_variables(packets_in_nodes):
                         # print packets_at_node
                         # print packets_at_cycles[cycle+1][neighbors_of_node[2]]
                         number_of_conflicts = number_of_conflicts + (intersection*(intersection-1))/2
+                        print(list1_as_set.intersection(extract_origin_packet_substrings_for_list(packets_at_cycles[cycle+1][neighbors_of_node[2]])))
                         # print "+" + str((intersection*(intersection-1))/2) + " conflicts"
                         # print "\n\n"
                 if(neighbors_of_node[3] in packets_at_cycles[cycle+1]):
@@ -147,6 +129,7 @@ def create_routing_table_from_array_of_lp_variables(packets_in_nodes):
                         # print packets_at_node
                         # print packets_at_cycles[cycle+1][neighbors_of_node[3]]
                         number_of_conflicts = number_of_conflicts + (intersection*(intersection-1))/2
+                        print(list1_as_set.intersection(extract_origin_packet_substrings_for_list(packets_at_cycles[cycle+1][neighbors_of_node[3]])))
                         # print "+" + str((intersection*(intersection-1))/2) + " conflicts"
                         # print "\n\n"                        
 
@@ -168,6 +151,44 @@ def create_routing_table_from_array_of_lp_variables(packets_in_nodes):
         if(not reached_master):
             print packet + " didn't reach master node"
             f.write(packet + " didn't reach master node\n")
+
+
+    f.write("\n\n")
+    f.write("\n\n")
+    f.write("======== LOAD BALANCE (ASSUMING STRICT LOAD BALANCE RULES ONLY, NOT ALWAYS ACCURATE) =============\n")
+    south = 0
+    north = 0
+    west = 0
+    east = 0
+    for x in packets_in_nodes:
+        if(x[find_nth(x, "N_", 1):]== "N_0_1"):
+            east = east + 1
+        elif (x[find_nth(x, "N_", 1):] == "N_1_0"):
+            south = south + 1
+        elif(x[find_nth(x, "N_", 1):]== ("N_0_"+str(COLS-1))): 
+            west = west + 1
+        elif(x[find_nth(x, "N_", 1):]== ("N_" + str(ROWS-1)+"_0")):
+            north = north + 1
+    f.write("NORTH - " + str(north) + "\n")
+    f.write("SOUTH - " + str(south) + "\n")
+    f.write("WEST - " + str(west) + "\n")
+    f.write("EAST - " + str(east) + "\n")
+    f.write(str(len(routes)) + " nodes in the topology")
+
+    for cycle, dict_of_packets in packets_at_cycles.items():
+        if(cycle == number_of_cycles-1):
+            continue
+        for node, packets_in_that_node in dict_of_packets.items():
+            for x in packets_in_that_node:
+                if(x[find_nth(x, "N_", 1):]== "N_0_1"):
+                    if((x[:find_nth(x, "T_", 1)] + "T_" + str(cycle+1)+"_N_0_0") in packets_at_cycles[cycle+1]["N_0_0"]):
+                        east = east + 1
+            elif (x[find_nth(x, "N_", 1):] == "N_1_0"):
+                south = south + 1
+            elif(x[find_nth(x, "N_", 1):]== ("N_0_"+str(COLS-1))): 
+                west = west + 1
+            elif(x[find_nth(x, "N_", 1):]== ("N_" + str(ROWS-1)+"_0")):
+                north = north + 1
 
 
 
@@ -197,7 +218,13 @@ if len(sys.argv) < 2:
 # Read and solve model
 
 model = gp.read(sys.argv[1])
-model.setParam("MIPGap", 1.0);
+model.setParam("MIPGap", 1.0)
+model.setParam("Threads", 16)
+model.setParam("NodefileStart", 0.5)
+
+
+# model.setParam("NodefileStart",  0.5)
+
 model.optimize()
 
 if model.status == GRB.INF_OR_UNBD:
