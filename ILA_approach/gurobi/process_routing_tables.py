@@ -15,9 +15,9 @@ import pdb
 """
 GLOBAL VARIABLES
 """
-ROWS = 6
-COLS = 12
-NUMBER_OF_TICKS = 20
+ROWS = 5
+COLS = 5
+NUMBER_OF_TICKS = 10
 
 link_load = []
 max_total_load_seen_by_packet_over_number_of_hops_array = []
@@ -434,43 +434,99 @@ for pi in range(ROWS):
 					neighbors = get_neighbors_for_node([ni, nj])
 					f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[0][0])+"_"+str(neighbors[0][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[1][0])+"_"+str(neighbors[1][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[2][0])+"_"+str(neighbors[2][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(neighbors[3][0])+"_"+str(neighbors[3][1])+" + P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_"+str(ni)+"_"+str(nj)+" - P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ni)+"_"+str(nj)+" >= 0\n")
 
+balanced_load = int(math.ceil((ROWS*COLS-1)/4.0))
 # MOST IMPORTANT THING: LOAD BALACNE
-f.write("\n\n\\ ========= LOAD BALANCE =========\n")
-f.write("\\ number of packets on each side need to be (COLS*ROWS-1)/4\n")
+# f.write("\n\n\\ ========= STRCIT LOAD BALANCE =========\n")
+# f.write("\\ number of packets on each side from the master node needs to be (COLS*ROWS-1)/4\n")
+# f.write("\\ i.e. if a packet ever gets to N_0_1, then he has to go the master next \n")
+# f.write("\\ i.e. he is not allowed to go to N_1_1 -> N_1_0 and then to master\n")
+
+# f.write("\\ EAST\n")
+# for x in ila_variables:
+# 	if("P_0_0" not in x):
+# 		# east
+# 		if(x[x.find("N"):]== "N_0_1"):
+# 			f.write(x + " + ")
+# f.write(" 0 <= " + str(balanced_load))
+# f.write("\n")
+
+# f.write("\\ SOUTH\n")
+# for x in ila_variables:
+# 	if("P_0_0" not in x):
+# 		# east
+# 		if(x[x.find("N"):]== "N_1_0"):
+# 			f.write(x + " + ")
+# f.write(" 0 <= " + str(balanced_load))
+# f.write("\n")
+
+# f.write("\\ WEST\n")
+# for x in ila_variables:
+# 	if("P_0_0" not in x):
+# 		# east
+# 		if(x[x.find("N"):]== ("N_0_"+str(COLS-1))):
+# 			f.write(x + " + ")
+# f.write(" 0 <= " + str(balanced_load))
+# f.write("\n")
+
+# f.write("\\ NORTH\n")
+# for x in ila_variables:
+# 	if("P_0_0" not in x):
+# 		# east
+# 		if(x[x.find("N"):]== ("N_" + str(ROWS-1)+"_0")):
+# 			f.write(x + " + ")
+# f.write(" 0 <= " + str(balanced_load))
+# f.write("\n")
+
+
+
+#
+#
+#
+# need to commment one of the 2 load balance strategies
+#
+f.write("\n\n\\ ========= NONSTRCIT (REGULAR) LOAD BALANCE =========\n")
+f.write("\\ number of packets on each side from the master node needs to be (COLS*ROWS-1)/4\n")
+f.write("\\ i.e. if a packet ever gets to N_0_1, then he doesn't have to go the master next \n")
+f.write("\\ i.e. he is  allowed to walk around, e.g. go to N_1_1 -> N_1_0 and then to master\n")
+
 f.write("\\ EAST\n")
-for x in ila_variables:
-	if("P_0_0" not in x):
-		# east
-		if(x[-5:]== "N_0_1"):
-			f.write(x + " + ")
-f.write(" 0 <= " + str(int(math.ceil((ROWS*COLS-1)/4.0))))
+for t in range(NUMBER_OF_TICKS-1):
+	for pi in range(ROWS):
+		for pj in range(COLS):
+			if(pi==0 and pj==0):
+				continue
+			f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_0_1"+" * "+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_0_0 + ")
+f.write(" 0 <= "+str(balanced_load))
 f.write("\n")
 
 f.write("\\ SOUTH\n")
-for x in ila_variables:
-	if("P_0_0" not in x):
-		# east
-		if(x[-5:]== "N_1_0"):
-			f.write(x + " + ")
-f.write(" 0 <= " + str(int(math.ceil((ROWS*COLS-1)/4.0))))
+for t in range(NUMBER_OF_TICKS-1):
+	for pi in range(ROWS):
+		for pj in range(COLS):
+			if(pi==0 and pj==0):
+				continue
+			f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_1_0"+" * "+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_0_0 + ")
+f.write(" 0 <= "+str(balanced_load))
 f.write("\n")
 
 f.write("\\ WEST\n")
-for x in ila_variables:
-	if("P_0_0" not in x):
-		# east
-		if(x[-6:]== ("N_0_"+str(COLS-1))):
-			f.write(x + " + ")
-f.write(" 0 <= " + str(int(math.ceil((ROWS*COLS-1)/4.0))))
+for t in range(NUMBER_OF_TICKS-1):
+	for pi in range(ROWS):
+		for pj in range(COLS):
+			if(pi==0 and pj==0):
+				continue
+			f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_0_"+str(COLS-1)+" * "+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_0_0 + ")
+f.write(" 0 <= "+str(balanced_load))
 f.write("\n")
 
 f.write("\\ NORTH\n")
-for x in ila_variables:
-	if("P_0_0" not in x):
-		# east
-		if(x[-5:]== ("N_" + str(ROWS-1)+"_0")):
-			f.write(x + " + ")
-f.write(" 0 <= " + str(int(math.ceil((ROWS*COLS-1)/4.0))))
+for t in range(NUMBER_OF_TICKS-1):
+	for pi in range(ROWS):
+		for pj in range(COLS):
+			if(pi==0 and pj==0):
+				continue
+			f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ROWS-1)+"_0"+" * "+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_0_0 + ")
+f.write(" 0 <= "+str(balanced_load))
 f.write("\n")
 
 
@@ -483,6 +539,10 @@ for p1i in range(ROWS):
 			continue
 		for p2i in range(ROWS):
 			for p2j in range(COLS):
+				if(p2j < p1j):
+					continue
+				if(p2j==p1j and p2i <= p1i):
+					continue
 				if(p2i==0 and p2j==0):
 					continue
 				if (p1i==p2i and p1j==p2j):
