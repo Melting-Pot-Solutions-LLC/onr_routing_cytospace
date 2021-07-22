@@ -406,7 +406,10 @@ f.write("0\n\n\n")
 #
 
 f.write("subject to\n")
+f.write("\\ this variable is fixed to be 0 \n")
+f.write("NULL = 0\n")
 f.write("\\ each packet can only be in one node at a time \n")
+
 for pi in range(ROWS):
 	for pj in range(COLS):
 		if(pi==0 and pj==0):
@@ -489,44 +492,44 @@ f.write("\\ number of packets on each side from the master node needs to be (COL
 f.write("\\ i.e. if a packet ever gets to N_0_1, then he doesn't have to go the master next \n")
 f.write("\\ i.e. he is  allowed to walk around, e.g. go to N_1_1 -> N_1_0 and then to master\n")
 
-f.write("\\ EAST\n")
+f.write("\\ EAST\n[ ")
 for t in range(NUMBER_OF_TICKS-1):
 	for pi in range(ROWS):
 		for pj in range(COLS):
 			if(pi==0 and pj==0):
 				continue
 			f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_0_1"+" * "+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_0_0 + ")
-f.write(" 0 <= "+str(balanced_load))
+f.write(" NULL * NULL ] + 0 <= "+str(balanced_load))
 f.write("\n")
 
-f.write("\\ SOUTH\n")
+f.write("\\ SOUTH\n[ ")
 for t in range(NUMBER_OF_TICKS-1):
 	for pi in range(ROWS):
 		for pj in range(COLS):
 			if(pi==0 and pj==0):
 				continue
 			f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_1_0"+" * "+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_0_0 + ")
-f.write(" 0 <= "+str(balanced_load))
+f.write(" NULL * NULL ] + 0 <= "+str(balanced_load))
 f.write("\n")
 
-f.write("\\ WEST\n")
+f.write("\\ WEST\n[ ")
 for t in range(NUMBER_OF_TICKS-1):
 	for pi in range(ROWS):
 		for pj in range(COLS):
 			if(pi==0 and pj==0):
 				continue
 			f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_0_"+str(COLS-1)+" * "+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_0_0 + ")
-f.write(" 0 <= "+str(balanced_load))
+f.write(" NULL * NULL ] + 0 <= "+str(balanced_load))
 f.write("\n")
 
-f.write("\\ NORTH\n")
+f.write("\\ NORTH\n[ ")
 for t in range(NUMBER_OF_TICKS-1):
 	for pi in range(ROWS):
 		for pj in range(COLS):
 			if(pi==0 and pj==0):
 				continue
 			f.write("P_"+str(pi)+"_"+str(pj)+"_T_"+str(t)+"_N_"+str(ROWS-1)+"_0"+" * "+"P_"+str(pi)+"_"+str(pj)+"_T_"+str(t+1)+"_N_0_0 + ")
-f.write(" 0 <= "+str(balanced_load))
+f.write(" NULL * NULL ] + 0 <= "+str(balanced_load))
 f.write("\n")
 
 
@@ -588,6 +591,7 @@ for pi in range(ROWS):
 
 f.write("\n\\ list of all variables\n")
 f.write("binary\n")
+f.write("NULL\n")
 for x in ila_variables:
 	f.write(x + "\n")
 
