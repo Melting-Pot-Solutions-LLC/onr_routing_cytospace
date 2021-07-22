@@ -155,26 +155,28 @@ def create_routing_table_from_array_of_lp_variables(packets_in_nodes):
 
     f.write("\n\n")
     f.write("\n\n")
-    f.write("======== LOAD BALANCE (ASSUMING STRICT LOAD BALANCE RULES ONLY, NOT ALWAYS ACCURATE) =============\n")
+    # f.write("======== LOAD BALANCE (ASSUMING STRICT LOAD BALANCE RULES ONLY, NOT ALWAYS ACCURATE) =============\n")
     south = 0
     north = 0
     west = 0
     east = 0
-    for x in packets_in_nodes:
-        if(x[find_nth(x, "N_", 1):]== "N_0_1"):
-            east = east + 1
-        elif (x[find_nth(x, "N_", 1):] == "N_1_0"):
-            south = south + 1
-        elif(x[find_nth(x, "N_", 1):]== ("N_0_"+str(COLS-1))): 
-            west = west + 1
-        elif(x[find_nth(x, "N_", 1):]== ("N_" + str(ROWS-1)+"_0")):
-            north = north + 1
-    f.write("NORTH - " + str(north) + "\n")
-    f.write("SOUTH - " + str(south) + "\n")
-    f.write("WEST - " + str(west) + "\n")
-    f.write("EAST - " + str(east) + "\n")
-    f.write(str(len(routes)) + " nodes in the topology")
+    # for x in packets_in_nodes:
+    #     if(x[find_nth(x, "N_", 1):]== "N_0_1"):
+    #         east = east + 1
+    #     elif (x[find_nth(x, "N_", 1):] == "N_1_0"):
+    #         south = south + 1
+    #     elif(x[find_nth(x, "N_", 1):]== ("N_0_"+str(COLS-1))): 
+    #         west = west + 1
+    #     elif(x[find_nth(x, "N_", 1):]== ("N_" + str(ROWS-1)+"_0")):
+    #         north = north + 1
+    # f.write("NORTH - " + str(north) + "\n")
+    # f.write("SOUTH - " + str(south) + "\n")
+    # f.write("WEST - " + str(west) + "\n")
+    # f.write("EAST - " + str(east) + "\n")
+    # f.write(str(len(routes)) + " nodes in the topology")
 
+
+    f.write("======== NOT STRICT LOAD BALANCE (ALWAYS ACCURATE) =============\n")
     for cycle, dict_of_packets in packets_at_cycles.items():
         if(cycle == number_of_cycles-1):
             continue
@@ -182,15 +184,21 @@ def create_routing_table_from_array_of_lp_variables(packets_in_nodes):
             for x in packets_in_that_node:
                 if(x[find_nth(x, "N_", 1):]== "N_0_1"):
                     if((x[:find_nth(x, "T_", 1)] + "T_" + str(cycle+1)+"_N_0_0") in packets_at_cycles[cycle+1]["N_0_0"]):
-                        east = east + 1
-            elif (x[find_nth(x, "N_", 1):] == "N_1_0"):
-                south = south + 1
-            elif(x[find_nth(x, "N_", 1):]== ("N_0_"+str(COLS-1))): 
-                west = west + 1
-            elif(x[find_nth(x, "N_", 1):]== ("N_" + str(ROWS-1)+"_0")):
-                north = north + 1
-
-
+                        east = east + 1    
+                elif (x[find_nth(x, "N_", 1):] == "N_1_0"):
+                    if((x[:find_nth(x, "T_", 1)] + "T_" + str(cycle+1)+"_N_0_0") in packets_at_cycles[cycle+1]["N_0_0"]):
+                        south = south + 1    
+                elif(x[find_nth(x, "N_", 1):]== ("N_0_"+str(COLS-1))): 
+                    if((x[:find_nth(x, "T_", 1)] + "T_" + str(cycle+1)+"_N_0_0") in packets_at_cycles[cycle+1]["N_0_0"]):
+                        west = west + 1 
+                elif(x[find_nth(x, "N_", 1):]== ("N_" + str(ROWS-1)+"_0")):
+                    if((x[:find_nth(x, "T_", 1)] + "T_" + str(cycle+1)+"_N_0_0") in packets_at_cycles[cycle+1]["N_0_0"]):
+                        north = north + 1 
+    f.write("NORTH - " + str(north) + "\n")
+    f.write("SOUTH - " + str(south) + "\n")
+    f.write("WEST - " + str(west) + "\n")
+    f.write("EAST - " + str(east) + "\n")
+    f.write(str(len(routes)) + " nodes in the topology")
 
 
 
